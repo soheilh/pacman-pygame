@@ -9,11 +9,12 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.all_sprites = pygame.sprite.Group()
-        self.player = Player(100, 100)
         self.walls = pygame.sprite.Group()
+        
+        # Load level and create walls and get initial player position
+        self.level, player_x, player_y = load_level(LEVEL_FILE, self.walls, TILE_SIZE)
+        self.player = Player(player_x, player_y)
         self.all_sprites.add(self.player)
-        # Load level and create walls
-        self.level = load_level(LEVEL_FILE, self.walls, TILE_SIZE)
 
     def run(self):
         while self.running:
