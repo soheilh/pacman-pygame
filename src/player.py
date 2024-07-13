@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
                 image = pygame.transform.scale(image, size)
                 self.animation_frames[direction].append(image)
 
-    def update(self, keys):
+    def update(self, keys, walls):
         # Update direction based on keys pressed
         dx = dy = 0
         if keys[pygame.K_LEFT]:
@@ -49,7 +49,7 @@ class Player(pygame.sprite.Sprite):
 
         # Apply movement and check for collisions
         if dx != 0 or dy != 0:
-            self.move(dx, dy)
+            self.move(dx, dy, walls)
 
         # Update direction and animation frames
         self.animation_timer += 1
@@ -58,5 +58,10 @@ class Player(pygame.sprite.Sprite):
             self.frame_index = (self.frame_index + 1) % len(self.animation_frames[self.direction])
             self.image = self.animation_frames[self.direction][self.frame_index]
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, walls):
         self.rect.x += dx
+        if pygame.sprite.spritecollideany(self, walls):
+            self.rect.x -= dx  # Undo the movement if there is a collision
+        self.rect.y += dy
+        if pygame.sprite.spritecollideany(self, walls):
+            self.rect.y -= dy  # Undo the movement if there is a collision
