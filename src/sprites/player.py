@@ -19,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_timer = 0
         self.animation_delay = 10  # Adjust speed of animation
         self.move_speed = 2  # Adjust speed of movement
+        self.tolerance = TILE_SIZE // 3  # Allow a half of tile_size tolerance for turning
 
     def load_images(self):
         # Load images for all directions
@@ -31,20 +32,39 @@ class Player(pygame.sprite.Sprite):
                 image = pygame.transform.scale(image, size)
                 self.animation_frames[direction].append(image)
 
-    def update(self, keys, walls):
-        # Update direction based on keys pressed
+    def update(self, keys, level, walls):
         dx = dy = 0
+        current_x = self.rect.center[0] // TILE_SIZE
+        current_y = self.rect.center[1] // TILE_SIZE
+
+        # Calculate desired movement
         if keys[pygame.K_LEFT]:
-            self.direction = "left"
+            if self.direction in ["up", "down"] and level[current_y][current_x - 1] != '#':
+                self.rect.centery = current_y * TILE_SIZE + TILE_SIZE // 2
+                self.direction = "left"
+            elif self.direction == "right":
+                self.direction = "left"
             dx = -self.move_speed
         elif keys[pygame.K_RIGHT]:
-            self.direction = "right"
+            if self.direction in ["up", "down"] and level[current_y][current_x + 1] != '#':
+                self.rect.centery = current_y * TILE_SIZE + TILE_SIZE // 2
+                self.direction = "right"
+            elif self.direction == "left":
+                self.direction = "right"
             dx = self.move_speed
         elif keys[pygame.K_UP]:
-            self.direction = "up"
+            if self.direction in ["left", "right"] and level[current_y - 1][current_x] != '#':
+                self.rect.centerx = current_x * TILE_SIZE + TILE_SIZE // 2
+                self.direction = "up"
+            elif self.direction == "down":
+                self.direction = "up"
             dy = -self.move_speed
         elif keys[pygame.K_DOWN]:
-            self.direction = "down"
+            if self.direction in ["left", "right"] and level[current_y + 1][current_x] != '#':
+                self.rect.centerx = current_x * TILE_SIZE + TILE_SIZE // 2
+                self.direction = "down"
+            elif self.direction == "up":
+                self.direction = "down"
             dy = self.move_speed
 
         # Apply movement and check for collisions

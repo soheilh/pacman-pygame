@@ -30,7 +30,7 @@ class Game:
 
     def update(self):
         keys = pygame.key.get_pressed()
-        self.player.update(keys, self.walls)
+        self.player.update(keys, self.level, self.walls)
 
     def draw(self):
         self.screen.fill(BLACK)
