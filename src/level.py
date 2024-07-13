@@ -1,5 +1,5 @@
 import pygame
-from wall import Wall
+from sprites.wall import Wall
 
 def load_level(file_path, wall_group, tile_size):
     with open(file_path, 'r') as file:

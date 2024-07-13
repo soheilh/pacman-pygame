@@ -1,5 +1,5 @@
 import pygame
-from player import Player
+from sprites.player import Player
 from settings import *
 from level import load_level
 
