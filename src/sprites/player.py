@@ -5,6 +5,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.direction = "right"
+        self.desired_direction = "right"
         self.frame_index = 0
         self.animation_frames = {
             "left": [],
@@ -19,7 +20,6 @@ class Player(pygame.sprite.Sprite):
         self.animation_timer = 0
         self.animation_delay = 10  # Adjust speed of animation
         self.move_speed = 2  # Adjust speed of movement
-        self.tolerance = TILE_SIZE // 3  # Allow a half of tile_size tolerance for turning
 
     def load_images(self):
         # Load images for all directions
@@ -33,50 +33,65 @@ class Player(pygame.sprite.Sprite):
                 self.animation_frames[direction].append(image)
 
     def update(self, keys, level, walls):
-        dx = dy = 0
-        current_x = self.rect.center[0] // TILE_SIZE
-        current_y = self.rect.center[1] // TILE_SIZE
+        center_x, center_y = self.rect.center
+        tile_x = center_x // TILE_SIZE
+        tile_y = center_y // TILE_SIZE
 
-        # Calculate desired movement
-        if keys[pygame.K_LEFT]:
-            if self.direction in ["up", "down"] and level[current_y][current_x - 1] != '#':
-                self.rect.centery = current_y * TILE_SIZE + TILE_SIZE // 2
-                self.direction = "left"
-            elif self.direction == "right":
-                self.direction = "left"
-            dx = -self.move_speed
-        elif keys[pygame.K_RIGHT]:
-            if self.direction in ["up", "down"] and level[current_y][current_x + 1] != '#':
-                self.rect.centery = current_y * TILE_SIZE + TILE_SIZE // 2
-                self.direction = "right"
-            elif self.direction == "left":
-                self.direction = "right"
-            dx = self.move_speed
-        elif keys[pygame.K_UP]:
-            if self.direction in ["left", "right"] and level[current_y - 1][current_x] != '#':
-                self.rect.centerx = current_x * TILE_SIZE + TILE_SIZE // 2
-                self.direction = "up"
-            elif self.direction == "down":
-                self.direction = "up"
-            dy = -self.move_speed
-        elif keys[pygame.K_DOWN]:
-            if self.direction in ["left", "right"] and level[current_y + 1][current_x] != '#':
-                self.rect.centerx = current_x * TILE_SIZE + TILE_SIZE // 2
-                self.direction = "down"
-            elif self.direction == "up":
-                self.direction = "down"
-            dy = self.move_speed
+        # Set desired direction based on key presses
+        self.set_desired_direction(keys)
+
+        # Check if we can turn to the desired direction
+        self.check_turning(tile_x, tile_y, center_x, center_y, level)
+
+        # Calculate current direction movement
+        dx, dy = self.calculate_movement()
 
         # Apply movement and check for collisions
         if dx != 0 or dy != 0:
             self.move(dx, dy, walls)
 
-        # Update direction and animation frames
-        self.animation_timer += 1
-        if self.animation_timer >= self.animation_delay:
-            self.animation_timer = 0
-            self.frame_index = (self.frame_index + 1) % len(self.animation_frames[self.direction])
-            self.image = self.animation_frames[self.direction][self.frame_index]
+        # Update animation frames
+        self.update_animation()
+
+    def set_desired_direction(self, keys):
+        if keys[pygame.K_LEFT]:
+            self.desired_direction = "left"
+        elif keys[pygame.K_RIGHT]:
+            self.desired_direction = "right"
+        elif keys[pygame.K_UP]:
+            self.desired_direction = "up"
+        elif keys[pygame.K_DOWN]:
+            self.desired_direction = "down"
+
+    def check_turning(self, tile_x, tile_y, center_x, center_y, level):
+        if self.desired_direction == "left" and level[tile_y][tile_x - 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
+            self.direction = "left"
+            dx = -self.move_speed
+            dy = 0
+        elif self.desired_direction == "right" and level[tile_y][tile_x + 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
+            self.direction = "right"
+            dx = self.move_speed
+            dy = 0
+        elif self.desired_direction == "up" and level[tile_y - 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
+            self.direction = "up"
+            dx = 0
+            dy = -self.move_speed
+        elif self.desired_direction == "down" and level[tile_y + 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
+            self.direction = "down"
+            dx = 0
+            dy = self.move_speed
+
+    def calculate_movement(self):
+        dx = dy = 0
+        if self.direction == "left":
+            dx = -self.move_speed
+        elif self.direction == "right":
+            dx = self.move_speed
+        elif self.direction == "up":
+            dy = -self.move_speed
+        elif self.direction == "down":
+            dy = self.move_speed
+        return dx, dy
 
     def move(self, dx, dy, walls):
         self.rect.x += dx
@@ -85,3 +100,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += dy
         if pygame.sprite.spritecollideany(self, walls):
             self.rect.y -= dy  # Undo the movement if there is a collision
+
+    def update_animation(self):
+        self.animation_timer += 1
+        if self.animation_timer >= self.animation_delay:
+            self.animation_timer = 0
+            self.frame_index = (self.frame_index + 1) % len(self.animation_frames[self.direction])
+            self.image = self.animation_frames[self.direction][self.frame_index]
