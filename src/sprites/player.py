@@ -57,6 +57,9 @@ class Player(pygame.sprite.Sprite):
         # Check for score collisions and update score
         self.score_collision(scores)
 
+        # Check for boundray collisions and teleport if needed
+        self.teleport(tile_x, tile_y, len(level[0]), len(level))
+
     def set_desired_direction(self, keys):
         if keys[pygame.K_LEFT]:
             self.desired_direction = "left"
@@ -68,19 +71,19 @@ class Player(pygame.sprite.Sprite):
             self.desired_direction = "down"
 
     def check_turning(self, tile_x, tile_y, center_x, center_y, level):
-        if self.desired_direction == "left" and level[tile_y][tile_x - 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
+        if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
             self.direction = "left"
             dx = -self.move_speed
             dy = 0
-        elif self.desired_direction == "right" and level[tile_y][tile_x + 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
+        elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
             self.direction = "right"
             dx = self.move_speed
             dy = 0
-        elif self.desired_direction == "up" and level[tile_y - 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
+        elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
             self.direction = "up"
             dx = 0
             dy = -self.move_speed
-        elif self.desired_direction == "down" and level[tile_y + 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
+        elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
             self.direction = "down"
             dx = 0
             dy = self.move_speed
@@ -117,3 +120,11 @@ class Player(pygame.sprite.Sprite):
         if collided_score:
             scores.remove(collided_score)
             self.score += 1
+
+    def teleport(self, x, y, width, height):
+        if x == -1 or x == width:
+            self.rect.centerx = (width - abs(x)) * TILE_SIZE
+            self.desired_direction = self.direction
+        elif y == -1 or y == height:
+            self.rect.centery = (height - abs(y)) * TILE_SIZE
+            self.desired_direction = self.direction
