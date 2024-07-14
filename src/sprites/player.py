@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_timer = 0
         self.animation_delay = 10  # Adjust speed of animation
         self.move_speed = 2  # Adjust speed of movement
+        self.score = 0
 
     def load_images(self):
         # Load images for all directions
@@ -32,7 +33,7 @@ class Player(pygame.sprite.Sprite):
                 image = pygame.transform.scale(image, size)
                 self.animation_frames[direction].append(image)
 
-    def update(self, keys, level, walls):
+    def update(self, keys, level, walls, scores):
         center_x, center_y = self.rect.center
         tile_x = center_x // TILE_SIZE
         tile_y = center_y // TILE_SIZE
@@ -52,6 +53,9 @@ class Player(pygame.sprite.Sprite):
 
         # Update animation frames
         self.update_animation()
+
+        # Check for score collisions and update score
+        self.score_collision(scores)
 
     def set_desired_direction(self, keys):
         if keys[pygame.K_LEFT]:
@@ -107,3 +111,9 @@ class Player(pygame.sprite.Sprite):
             self.animation_timer = 0
             self.frame_index = (self.frame_index + 1) % len(self.animation_frames[self.direction])
             self.image = self.animation_frames[self.direction][self.frame_index]
+
+    def score_collision(self, scores):
+        collided_score = pygame.sprite.spritecollideany(self, scores)
+        if collided_score:
+            scores.remove(collided_score)
+            self.score += 1

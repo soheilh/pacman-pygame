@@ -10,9 +10,10 @@ class Game:
         self.running = True
         self.all_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.scores = pygame.sprite.Group()
         
-        # Load level and create walls and get initial player position
-        self.level, player_x, player_y = load_level(LEVEL_FILE, self.walls, TILE_SIZE)
+        # Load level and create walls, scores, and get initial player position
+        self.level, player_x, player_y = load_level(LEVEL_FILE, self.walls, self.scores, TILE_SIZE)
         self.player = Player(player_x, player_y)
         self.all_sprites.add(self.player)
 
@@ -30,10 +31,11 @@ class Game:
 
     def update(self):
         keys = pygame.key.get_pressed()
-        self.player.update(keys, self.level, self.walls)
+        self.player.update(keys, self.level, self.walls, self.scores)
 
     def draw(self):
         self.screen.fill(BLACK)
         self.walls.draw(self.screen)
+        self.scores.draw(self.screen)
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
