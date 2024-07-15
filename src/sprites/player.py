@@ -71,19 +71,20 @@ class Player(pygame.sprite.Sprite):
             self.desired_direction = "down"
 
     def check_turning(self, tile_x, tile_y, center_x, center_y, level):
-        if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
+        wall = ['1', '2']
+        if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
             self.direction = "left"
             dx = -self.move_speed
             dy = 0
-        elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] != '#' and (tile_y + 0.5) * TILE_SIZE == center_y:
+        elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
             self.direction = "right"
             dx = self.move_speed
             dy = 0
-        elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
+        elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
             self.direction = "up"
             dx = 0
             dy = -self.move_speed
-        elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] != '#' and (tile_x + 0.5) * TILE_SIZE == center_x:
+        elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
             self.direction = "down"
             dx = 0
             dy = self.move_speed
