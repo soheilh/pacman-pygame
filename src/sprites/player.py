@@ -36,32 +36,24 @@ class Player(pygame.sprite.Sprite):
             self.animation_frames.append(image)
 
     def update(self, keys, level, walls, scores):
-        print(self.direction, self.desired_direction)
         center_x, center_y = self.rect.center
         tile_x = center_x // TILE_SIZE
         tile_y = center_y // TILE_SIZE
-
         # Set desired direction based on key presses
         self.set_desired_direction(keys)
-
         # Check if we can turn to the desired direction
         self.check_turning(tile_x, tile_y, center_x, center_y, level)
-
         # Calculate current direction movement
         dx, dy = self.calculate_movement()
-
         # Apply movement and check for collisions
         if dx != 0 or dy != 0:
             self.move(dx, dy, walls, len(level[0]), len(level))
-
-        # Update animation frames
-        self.update_animation()
-
-        # Check for score collisions and update score
-        self.score_collision(scores)
-
         # Check for boundary collisions and teleport if needed
         self.teleport(tile_x, tile_y, len(level[0]), len(level))
+        # Update animation frames
+        self.update_animation()
+        # Check for score collisions and update score
+        self.score_collision(scores)
 
     def set_desired_direction(self, keys):
         if keys[pygame.K_LEFT]:
@@ -75,15 +67,16 @@ class Player(pygame.sprite.Sprite):
 
     def check_turning(self, tile_x, tile_y, center_x, center_y, level):
         wall = ['1', '2']
-        print((tile_x + 0.5) * TILE_SIZE, center_x)
-        if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
-            self.direction = "left"
-        elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
-            self.direction = "right"
-        elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
-            self.direction = "up"
-        elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
-            self.direction = "down"
+        in_range = 0 < tile_x < len(level[0]) - 1 and 0 < tile_y < len(level) - 1
+        if in_range:
+            if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
+                self.direction = "left"
+            elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
+                self.direction = "right"
+            elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
+                self.direction = "up"
+            elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
+                self.direction = "down"
 
     def calculate_movement(self):
         dx = dy = 0
@@ -105,7 +98,6 @@ class Player(pygame.sprite.Sprite):
                 self.rect.right = collision.rect.left
             elif dx < 0:
                 self.rect.left = collision.rect.right
-
         self.rect.y += dy
         collision = pygame.sprite.spritecollideany(self, walls)
         if collision:
@@ -121,7 +113,6 @@ class Player(pygame.sprite.Sprite):
             self.frame_index = (self.frame_index + 1) % len(self.animation_frames)
             self.image = self.animation_frames[self.frame_index]
             self.original_image = self.image  # Update the original image
-
         # Rotate the image based on the direction
         self.image = pygame.transform.rotate(self.original_image, self.angles[self.direction])
 
@@ -133,8 +124,6 @@ class Player(pygame.sprite.Sprite):
 
     def teleport(self, x, y, width, height):
         if x == -1 or x == width:
-            self.rect.centerx = (width - abs(x)) * TILE_SIZE
-            self.desired_direction = self.direction
+            self.rect.centerx = (width - abs(x) + 0.5) * TILE_SIZE
         elif y == -1 or y == height:
-            self.rect.centery = (height - abs(y)) * TILE_SIZE
-            self.desired_direction = self.direction
+            self.rect.centery = (height - abs(y) + 0.5) * TILE_SIZE
