@@ -22,7 +22,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
         self.animation_timer = 0
         self.animation_delay = 6  # Adjust speed of animation
-        self.move_speed = 3  # Adjust speed of movement
+        self.move_speed = 200  # Adjust speed of movement (pixels per second)
+        self.velocity = pygame.Vector2(0, 0)
         self.score = 0
 
     def load_images(self):
@@ -35,7 +36,7 @@ class Player(pygame.sprite.Sprite):
             image = pygame.transform.scale(image, size)
             self.animation_frames.append(image)
 
-    def update(self, keys, level, walls, scores):
+    def update(self, keys, level, walls, scores, delta_time):
         center_x, center_y = self.rect.center
         tile_x = center_x // TILE_SIZE
         tile_y = center_y // TILE_SIZE
@@ -44,10 +45,10 @@ class Player(pygame.sprite.Sprite):
         # Check if we can turn to the desired direction
         self.check_turning(tile_x, tile_y, center_x, center_y, level)
         # Calculate current direction movement
-        dx, dy = self.calculate_movement()
+        self.calculate_movement()
         # Apply movement and check for collisions
-        if dx != 0 or dy != 0:
-            self.move(dx, dy, walls, len(level[0]), len(level))
+        if self.velocity.length() > 0:
+            self.move(self.velocity * delta_time, walls, len(level[0]), len(level))
         # Check for boundary collisions and teleport if needed
         self.teleport(tile_x, tile_y, len(level[0]), len(level))
         # Update animation frames
@@ -68,42 +69,49 @@ class Player(pygame.sprite.Sprite):
     def check_turning(self, tile_x, tile_y, center_x, center_y, level):
         wall = ['1', '2']
         in_range = 0 < tile_x < len(level[0]) - 1 and 0 < tile_y < len(level) - 1
-        if in_range:
-            if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
+        if in_range and  self.is_close_to_center(center_x, center_y):
+            if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] not in wall:
                 self.direction = "left"
-            elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] not in wall and (tile_y + 0.5) * TILE_SIZE == center_y:
+                self.rect.centery = (tile_y + 0.5) * TILE_SIZE
+            elif self.desired_direction == "right" and tile_x < len(level[0]) - 1 and level[tile_y][tile_x + 1] not in wall:
                 self.direction = "right"
-            elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
+                self.rect.centery = (tile_y + 0.5) * TILE_SIZE
+            elif self.desired_direction == "up" and tile_y > 0 and level[tile_y - 1][tile_x] not in wall:
                 self.direction = "up"
-            elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] not in wall and (tile_x + 0.5) * TILE_SIZE == center_x:
+                self.rect.centerx = (tile_x + 0.5) * TILE_SIZE
+            elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] not in wall:
                 self.direction = "down"
+                self.rect.centerx = (tile_x + 0.5) * TILE_SIZE
+    
+    def is_close_to_center(self, center_x, center_y):
+        tolerance = 3
+        return abs(center_x % TILE_SIZE - TILE_SIZE // 2) < tolerance and abs(center_y % TILE_SIZE - TILE_SIZE // 2) < tolerance
 
     def calculate_movement(self):
-        dx = dy = 0
+        self.velocity = pygame.Vector2(0, 0)
         if self.direction == "left":
-            dx = -self.move_speed
+            self.velocity.x = -self.move_speed
         elif self.direction == "right":
-            dx = self.move_speed
+            self.velocity.x = self.move_speed
         elif self.direction == "up":
-            dy = -self.move_speed
+            self.velocity.y = -self.move_speed
         elif self.direction == "down":
-            dy = self.move_speed
-        return dx, dy
+            self.velocity.y = self.move_speed
 
-    def move(self, dx, dy, walls, width, height):
-        self.rect.x += dx
+    def move(self, movement, walls, width, height):
+        self.rect.x += movement.x
         collision = pygame.sprite.spritecollideany(self, walls)
         if collision:
-            if dx > 0:
+            if movement.x > 0:
                 self.rect.right = collision.rect.left
-            elif dx < 0:
+            elif movement.x < 0:
                 self.rect.left = collision.rect.right
-        self.rect.y += dy
+        self.rect.y += movement.y
         collision = pygame.sprite.spritecollideany(self, walls)
         if collision:
-            if dy > 0:
+            if movement.y > 0:
                 self.rect.bottom = collision.rect.top
-            elif dy < 0:
+            elif movement.y < 0:
                 self.rect.top = collision.rect.bottom
 
     def update_animation(self):

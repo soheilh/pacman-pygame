@@ -20,18 +20,18 @@ class Game:
     def run(self):
         while self.running:
             self.events()
-            self.update()
+            delta_time = self.clock.tick(FPS) / 1000.0  # Time per frame in seconds
+            self.update(delta_time)
             self.draw()
-            self.clock.tick(FPS)
 
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
-    def update(self):
+    def update(self, delta_time):
         keys = pygame.key.get_pressed()
-        self.player.update(keys, self.level, self.walls, self.scores)
+        self.player.update(keys, self.level, self.walls, self.scores, delta_time)
 
     def draw(self):
         self.screen.fill(BLACK)
