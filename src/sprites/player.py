@@ -48,7 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.calculate_movement()
         # Apply movement and check for collisions
         if self.velocity.length() > 0:
-            self.move(self.velocity * delta_time, walls, len(level[0]), len(level))
+            self.move(self.velocity * delta_time, walls)
         # Check for boundary collisions and teleport if needed
         self.teleport(tile_x, tile_y, len(level[0]), len(level))
         # Update animation frames
@@ -98,7 +98,7 @@ class Player(pygame.sprite.Sprite):
         elif self.direction == "down":
             self.velocity.y = self.move_speed
 
-    def move(self, movement, walls, width, height):
+    def move(self, movement, walls):
         self.rect.x += movement.x
         collision = pygame.sprite.spritecollideany(self, walls)
         if collision:
