@@ -5,12 +5,12 @@ from level import load_level
 
 class Game:
     def __init__(self):
+        # Initialize fonts
         self.uifont = pygame.font.Font("assets/fonts/emulogic.ttf", 16)
 
-        # Screen dimensions
+        # Set up the display
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.running = True
 
         # Define UI heights
         self.top_ui_height = 50
@@ -20,26 +20,25 @@ class Game:
         # Create surfaces for UI areas
         self.top_ui_surface = pygame.Surface((SCREEN_WIDTH, self.top_ui_height))
         self.bottom_ui_surface = pygame.Surface((SCREEN_WIDTH, self.bottom_ui_height))
-
-        # Map area surface
         self.map_area_surface = pygame.Surface((SCREEN_WIDTH, self.map_area_height))
 
-        self.all_sprites = pygame.sprite.Group()
+        # Initialize sprite groups
         self.walls = pygame.sprite.Group()
         self.scores = pygame.sprite.Group()
 
-        # Load level and create walls, scores, and get initial player position
-        self.level, player_x, player_y = load_level(LEVEL_FILE, self.walls, self.scores, TILE_SIZE)
+        # Load level and initialize game objects
+        self.level, player_x, player_y = load_level(
+            LEVEL_FILE, self.walls, self.scores, TILE_SIZE
+        )
         self.player = Player(player_x, player_y)
-        self.all_sprites.add(self.player)
+        self.player_sprites = pygame.sprite.Group(self.player)
 
-        # Initialize font for displaying score and other UI elements
-        self.font = pygame.font.Font(None, 36)
+        self.running = True
 
     def run(self):
         while self.running:
             self.events()
-            delta_time = self.clock.tick(FPS) / 1000.0  # Time per frame in seconds
+            delta_time = self.clock.tick(FPS) / 1000.0
             self.update(delta_time)
             self.draw()
 
@@ -58,8 +57,8 @@ class Game:
         # Draw top UI
         self.top_ui_surface.fill(BLACK)
         score_text = self.uifont.render(f"Score:{self.player.score:02}", True, WHITE)
-        score_text_rect = score_text.get_rect()
-        self.top_ui_surface.blit(score_text, (10, (self.top_ui_height - score_text_rect.height) // 2))
+        score_text_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, self.top_ui_height // 2))
+        self.top_ui_surface.blit(score_text, score_text_rect)
         self.screen.blit(self.top_ui_surface, (0, 0))
 
         # Draw bottom UI
@@ -70,7 +69,7 @@ class Game:
         self.map_area_surface.fill(BLACK)
         self.walls.draw(self.map_area_surface)
         self.scores.draw(self.map_area_surface)
-        self.all_sprites.draw(self.map_area_surface)
+        self.player_sprites.draw(self.map_area_surface)
         self.screen.blit(self.map_area_surface, (0, self.top_ui_height))
 
         pygame.display.flip()
