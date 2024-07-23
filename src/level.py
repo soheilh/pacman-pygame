@@ -5,6 +5,8 @@ from sprites.score import Score
 def load_level(file_path, wall_group, score_group, tile_size):
     initial_player_x = 18 * tile_size
     initial_player_y = 15 * tile_size
+    blinky_start_x = None
+    blinky_start_y = None
 
     with open(file_path, 'r') as file:
         level = [list(line.replace("\n", "")) for line in file]
@@ -54,5 +56,8 @@ def load_level(file_path, wall_group, score_group, tile_size):
             elif tile == '.':
                 score = Score(x * tile_size, y * tile_size, tile_size)
                 score_group.add(score)
+            elif tile == 'B':
+                blinky_start_x = x * tile_size
+                blinky_start_y = y * tile_size
 
-    return level, initial_player_x, initial_player_y
+    return level, initial_player_x, initial_player_y, blinky_start_x, blinky_start_y

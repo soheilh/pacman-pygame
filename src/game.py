@@ -1,5 +1,6 @@
 import pygame
 from sprites.player import Player
+from sprites.ghosts import Blinky
 from settings import *
 from level import load_level
 
@@ -25,13 +26,16 @@ class Game:
         # Initialize sprite groups
         self.walls = pygame.sprite.Group()
         self.scores = pygame.sprite.Group()
+        self.ghosts = pygame.sprite.Group()
 
         # Load level and initialize game objects
-        self.level, player_x, player_y = load_level(
+        self.level, player_x, player_y, blinky_x, blinky_y = load_level(
             LEVEL_FILE, self.walls, self.scores, TILE_SIZE
         )
         self.player = Player(player_x, player_y)
         self.player_sprites = pygame.sprite.Group(self.player)
+        self.blinky = Blinky(blinky_x, blinky_y)
+        self.ghosts.add(self.blinky)
 
         self.running = True
 
@@ -50,6 +54,11 @@ class Game:
     def update(self, delta_time):
         keys = pygame.key.get_pressed()
         self.player.update(keys, self.level, self.walls, self.scores, delta_time)
+        player_pos = (
+            self.player.rect.center[0] // TILE_SIZE,
+            self.player.rect.center[1] // TILE_SIZE
+        )
+        self.ghosts.update(self.level, self.walls, delta_time, player_pos)
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -70,6 +79,7 @@ class Game:
         self.walls.draw(self.map_area_surface)
         self.scores.draw(self.map_area_surface)
         self.player_sprites.draw(self.map_area_surface)
+        self.ghosts.draw(self.map_area_surface)
         self.screen.blit(self.map_area_surface, (0, self.top_ui_height))
 
         pygame.display.flip()
