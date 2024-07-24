@@ -3,7 +3,7 @@ import os
 from settings import TILE_SIZE
 
 class Ghost(pygame.sprite.Sprite):
-    def __init__(self, x, y, ghost_name):
+    def __init__(self, x, y, ghost_name, scatter_target):
         super().__init__()
         self.direction = "left"
         self.load_images(ghost_name)
@@ -11,7 +11,18 @@ class Ghost(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
         self.move_speed = 150
         self.velocity = pygame.Vector2(0, 0)
-    
+        self.scatter_target = scatter_target
+        self.target = scatter_target
+        self.mode = "scatter"
+        self.timer = 0
+        self.cycle_index = 0
+        self.cycles = [
+            ("scatter", 7), ("chase", 20),
+            ("scatter", 7), ("chase", 20),
+            ("scatter", 5), ("chase", 20),
+            ("scatter", 5), ("chase", float('inf'))
+        ]
+
     def load_images(self, name):
         base_path = "assets/images/ghosts"
         size = (TILE_SIZE, TILE_SIZE)
@@ -20,28 +31,45 @@ class Ghost(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, size)
 
     def update(self, level, walls, delta_time, player_pos):
+        self.timer += delta_time
+        self.update_mode(player_pos)
+
         ghost_x, ghost_y = self.rect.center
         tile_x, tile_y = ghost_x // TILE_SIZE, ghost_y // TILE_SIZE
-        self.find_closest_neighbor(ghost_x, ghost_y, level, player_pos)
+
+        self.find_closest_neighbor(ghost_x, ghost_y, level, self.target)
         self.calculate_movement()
-        
+
         if self.velocity.length() > 0:
             self.move(self.velocity * delta_time, walls)
-        
+
         self.teleport(tile_x, tile_y, len(level[0]), len(level))
-    
+
+    def update_mode(self, player_pos):
+        mode, duration = self.cycles[self.cycle_index]
+        if self.timer >= duration:
+            self.timer -= duration
+            self.cycle_index = (self.cycle_index + 1) % len(self.cycles)
+            self.mode, _ = self.cycles[self.cycle_index]
+            print(f"Switched to {self.mode} mode")
+        # Update target based on mode
+        if self.mode == "scatter":
+            self.target = self.scatter_target
+        elif self.mode == "chase":
+            self.target = player_pos
+
     def find_closest_neighbor(self, x, y, level, target):
         tile_x = x // TILE_SIZE
         tile_y = y // TILE_SIZE
         wall_values = {'1', '2'}
-        
+
         neighbors = [
             (tile_x, tile_y - 1, "up"),    # Up
             (tile_x + 1, tile_y, "right"), # Right
             (tile_x, tile_y + 1, "down"),  # Down
             (tile_x - 1, tile_y, "left")   # Left
         ]
-        
+
         directions = ["up", "right", "down", "left"]
         direction_index = {dir: idx for idx, dir in enumerate(directions)}
         current_direction_idx = direction_index[self.direction]
@@ -51,25 +79,24 @@ class Ghost(pygame.sprite.Sprite):
             (nx, ny, direction) for (nx, ny, direction) in neighbors
             if 0 <= ny < len(level) and 0 <= nx < len(level[0]) and level[ny][nx] not in wall_values
         ]
-        
+
         filtered_neighbors = [
             (nx, ny, direction) for (nx, ny, direction) in passable_neighbors 
             if direction_index[direction] != opposite_direction_idx
         ]
 
-        if len(passable_neighbors) >= 2:
+        if len(passable_neighbors) >= 1:
             distances = [
                 (direction, (target[0] - nx) ** 2 + (target[1] - ny) ** 2)
                 for (nx, ny, direction) in filtered_neighbors
             ]
             distances.sort(key=lambda item: (item[1], self.direction_priority(item[0])))
-            
+
             if distances and self.is_close_to_center(x, y):
                 self.rect.centerx = (tile_x + 0.5) * TILE_SIZE
                 self.rect.centery = (tile_y + 0.5) * TILE_SIZE
                 best_direction = distances[0][0]
                 self.direction = best_direction
-                print(f"Direction: {self.direction}, Filtered neighbors: {distances}")
 
     def is_close_to_center(self, x, y):
         tolerance = 2
@@ -100,7 +127,7 @@ class Ghost(pygame.sprite.Sprite):
                 self.rect.right = collision.rect.left
             elif movement.x < 0:
                 self.rect.left = collision.rect.right
-        
+
         self.rect.y += movement.y
         collision = pygame.sprite.spritecollideany(self, walls)
         if collision:
@@ -108,7 +135,7 @@ class Ghost(pygame.sprite.Sprite):
                 self.rect.bottom = collision.rect.top
             elif movement.y < 0:
                 self.rect.top = collision.rect.bottom
-    
+
     def teleport(self, x, y, width, height):
         if x == -1 or x == width:
             self.rect.centerx = (width - abs(x) + 0.5) * TILE_SIZE
@@ -117,4 +144,16 @@ class Ghost(pygame.sprite.Sprite):
 
 class Blinky(Ghost):
     def __init__(self, x, y):
-        super().__init__(x, y, "blinky")
+        super().__init__(x, y, "blinky", (27, 1))
+
+class Pinky(Ghost):
+    def __init__(self, x, y):
+        super().__init__(x, y, "pinky", (0, 1))
+
+class Inky(Ghost):
+    def __init__(self, x, y):
+        super().__init__(x, y, "inky", (27, 29))
+
+class Clyde(Ghost):
+    def __init__(self, x, y):
+        super().__init__(x, y, "clyde", (0, 29))

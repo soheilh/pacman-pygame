@@ -1,6 +1,5 @@
 import pygame
 from sprites.player import Player
-from sprites.ghosts import Blinky
 from settings import *
 from level import load_level
 
@@ -29,13 +28,12 @@ class Game:
         self.ghosts = pygame.sprite.Group()
 
         # Load level and initialize game objects
-        self.level, player_x, player_y, blinky_x, blinky_y = load_level(
+        self.level, player_x, player_y, self.blinky, self.pinky, self.inky, self.clyde = load_level(
             LEVEL_FILE, self.walls, self.scores, TILE_SIZE
         )
         self.player = Player(player_x, player_y)
         self.player_sprites = pygame.sprite.Group(self.player)
-        self.blinky = Blinky(blinky_x, blinky_y)
-        self.ghosts.add(self.blinky)
+        self.ghosts.add(self.blinky, self.pinky, self.inky, self.clyde)
 
         self.running = True
 

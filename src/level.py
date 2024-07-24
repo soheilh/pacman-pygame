@@ -1,6 +1,6 @@
-import pygame
 from sprites.wall import Wall
 from sprites.score import Score
+from sprites.ghosts import Blinky, Pinky, Inky, Clyde 
 
 def load_level(file_path, wall_group, score_group, tile_size):
     initial_player_x = 18 * tile_size
@@ -57,7 +57,12 @@ def load_level(file_path, wall_group, score_group, tile_size):
                 score = Score(x * tile_size, y * tile_size, tile_size)
                 score_group.add(score)
             elif tile == 'B':
-                blinky_start_x = x * tile_size
-                blinky_start_y = y * tile_size
+                blinky = Blinky(x * tile_size, y * tile_size)
+            elif tile == 'P':
+                pinky = Pinky(x * tile_size, y * tile_size)
+            elif tile == 'I':
+                inky = Inky(x * tile_size, y * tile_size)
+            elif tile == 'C':
+                clyde = Clyde(x * tile_size, y * tile_size)
 
-    return level, initial_player_x, initial_player_y, blinky_start_x, blinky_start_y
+    return level, initial_player_x, initial_player_y, blinky, pinky, inky, clyde
