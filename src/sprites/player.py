@@ -12,11 +12,12 @@ class Player(pygame.sprite.Sprite):
         self.load_images()
         self.image = self.animation_frames[self.frame_index]
         self.original_image = self.image  # Store the original image for rotation
+        self.arrow_image = pygame.image.load("assets/images/other/arrow.png").convert_alpha()
         self.angles = {
-            "right": 0,
-            "up": 90,
-            "left": 180,
-            "down": 270
+            "right": [0, (TILE_SIZE, 0)],
+            "up": [90, (0, -TILE_SIZE)],
+            "left": [180, (-TILE_SIZE, 0)],
+            "down": [270, (0, TILE_SIZE)]
         }
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
@@ -69,7 +70,7 @@ class Player(pygame.sprite.Sprite):
     def check_turning(self, tile_x, tile_y, center_x, center_y, level):
         wall = ['1', '2']
         in_range = 0 < tile_x < len(level[0]) - 1 and 0 < tile_y < len(level) - 1
-        if in_range and  self.is_close_to_center(center_x, center_y):
+        if in_range and self.is_close_to_center(center_x, center_y):
             if self.desired_direction == "left" and tile_x > 0 and level[tile_y][tile_x - 1] not in wall:
                 self.direction = "left"
                 self.rect.centery = (tile_y + 0.5) * TILE_SIZE
@@ -82,7 +83,7 @@ class Player(pygame.sprite.Sprite):
             elif self.desired_direction == "down" and tile_y < len(level) - 1 and level[tile_y + 1][tile_x] not in wall:
                 self.direction = "down"
                 self.rect.centerx = (tile_x + 0.5) * TILE_SIZE
-    
+
     def is_close_to_center(self, center_x, center_y):
         tolerance = 3
         return abs(center_x % TILE_SIZE - TILE_SIZE // 2) < tolerance and abs(center_y % TILE_SIZE - TILE_SIZE // 2) < tolerance
@@ -122,7 +123,7 @@ class Player(pygame.sprite.Sprite):
             self.image = self.animation_frames[self.frame_index]
             self.original_image = self.image  # Update the original image
         # Rotate the image based on the direction
-        self.image = pygame.transform.rotate(self.original_image, self.angles[self.direction])
+        self.image = pygame.transform.rotate(self.original_image, self.angles[self.direction][0])
 
     def score_collision(self, scores):
         collided_score = pygame.sprite.spritecollideany(self, scores)
@@ -135,3 +136,11 @@ class Player(pygame.sprite.Sprite):
             self.rect.centerx = (width - abs(x) + 0.5) * TILE_SIZE
         elif y == -1 or y == height:
             self.rect.centery = (height - abs(y) + 0.5) * TILE_SIZE
+
+    def draw_direction_arrow(self):
+        arrow_image = pygame.transform.scale(self.arrow_image, (TILE_SIZE, TILE_SIZE))
+        angle = self.angles[self.desired_direction][0]
+        rotated_arrow = pygame.transform.rotate(arrow_image, angle)
+        offset = self.angles[self.desired_direction][1]
+        arrow_rect = rotated_arrow.get_rect(center=(self.rect.centerx + offset[0], self.rect.centery + offset[1]))
+        return rotated_arrow, arrow_rect.topleft
