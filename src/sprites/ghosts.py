@@ -51,7 +51,6 @@ class Ghost(pygame.sprite.Sprite):
             self.timer -= duration
             self.cycle_index = (self.cycle_index + 1) % len(self.cycles)
             self.mode, _ = self.cycles[self.cycle_index]
-            print(f"Switched to {self.mode} mode")
         # Update target based on mode
         if self.mode == "scatter":
             self.target = self.scatter_target
