@@ -1,4 +1,5 @@
 import pygame
+import settings
 
 class Selector:
     def __init__(self, pos, name, options, action, font, color, hover_color, rect_hover_color):
@@ -9,14 +10,14 @@ class Selector:
         self.hover_color = hover_color
         self.rect_hover_color = rect_hover_color
         self.name = name
-        self.options = [str(option) for option in options]
-        self.current_option = 0
+        self.options = [option for option in options]
+        self.current_option = self.options.index(getattr(settings, self.action))
         self.update_texts()
 
     def update_texts(self):
         self.name_text = self.font.render(self.name, True, self.color)
         self.name_rect = self.name_text.get_rect(center=(self.x_pos - 150, self.y_pos))
-        self.option_text = self.font.render(self.options[self.current_option], True, self.color)
+        self.option_text = self.font.render(str(self.options[self.current_option]), True, self.color)
         self.option_rect = self.option_text.get_rect(center=(self.x_pos + 150, self.y_pos))
 
     def update(self, screen):
@@ -44,4 +45,6 @@ class Selector:
 
     def change_option(self, direction=1):
         self.current_option = (self.current_option + direction) % len(self.options)
-        self.update_texts()
+        self.option_text = self.font.render(str(self.options[self.current_option]), True, self.color)
+        new_value = self.options[self.current_option]
+        setattr(settings, self.action, new_value)

@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 from sprites.player import Player
+import settings
 from settings import *
 from level import load_level
 from components.pause_menu import PauseMenu
@@ -112,9 +113,13 @@ class Game:
         self.walls.draw(self.map_area_surface)
         self.scores.draw(self.map_area_surface)
         self.player_sprites.draw(self.map_area_surface)
-        if SHOW_DIRECTION_ARROW:
+        
+        # Dynamically check the updated setting
+        show_direction_arrow = getattr(settings, "SHOW_DIRECTION_ARROW")
+        if show_direction_arrow:
             direction_arrow = self.player.draw_direction_arrow()
             self.map_area_surface.blit(direction_arrow[0], direction_arrow[1])
+        
         self.ghosts.draw(self.map_area_surface)
         self.game_surface.blit(self.map_area_surface, (0, self.top_ui_height))
         self.screen.blit(self.game_surface, (self.x_offset, self.y_offset))
