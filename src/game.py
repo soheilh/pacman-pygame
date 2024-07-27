@@ -66,7 +66,6 @@ class Game:
             self.draw()
 
     def events(self):
-        # print(self.running, self.paused)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -74,17 +73,7 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.paused = not self.paused  # Toggle pause state
                 elif self.paused:
-                    if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and (self.pause_menu.menu_selected is None):
-                        self.pause_menu.menu_selected = 0
-                    elif event.key == pygame.K_UP:
-                        self.pause_menu.menu_selected = (self.pause_menu.menu_selected - 1) % len(self.pause_menu.buttons)
-                    elif event.key == pygame.K_DOWN:
-                        self.pause_menu.menu_selected = (self.pause_menu.menu_selected + 1) % len(self.pause_menu.buttons)
-                    elif event.key == pygame.K_RETURN:
-                        if self.pause_menu.menu_selected == 0:
-                            self.paused = False  # Resume game
-                        elif self.pause_menu.menu_selected == 1:
-                            self.running = False  # Quit game
+                    self.running, self.paused = self.pause_menu.events(event)
             elif event.type == pygame.MOUSEMOTION and self.paused:
                 self.pause_menu.events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.paused:
