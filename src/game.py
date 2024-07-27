@@ -55,7 +55,6 @@ class Game:
             LEVEL_FILE, self.walls, self.scores, TILE_SIZE
         )
         self.player = Player(player_x, player_y)
-        self.player_sprites = pygame.sprite.Group(self.player)
         self.ghosts.add(self.blinky, self.pinky, self.inky, self.clyde)
 
     def run(self):
@@ -112,7 +111,7 @@ class Game:
         self.map_area_surface.fill(BLACK)
         self.walls.draw(self.map_area_surface)
         self.scores.draw(self.map_area_surface)
-        self.player_sprites.draw(self.map_area_surface)
+        self.player.draw(self.map_area_surface)
         
         # Dynamically check the updated setting
         show_direction_arrow = getattr(settings, "SHOW_DIRECTION_ARROW")

@@ -19,8 +19,7 @@ class Player(pygame.sprite.Sprite):
             "left": [180, (-TILE_SIZE, 0)],
             "down": [270, (0, TILE_SIZE)]
         }
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
         self.animation_timer = 0
         self.animation_delay = 6  # Adjust speed of animation
         self.move_speed = 200  # Adjust speed of movement (pixels per second)
@@ -30,7 +29,7 @@ class Player(pygame.sprite.Sprite):
     def load_images(self):
         # Load images (one set of images)
         base_path = "assets/images/pacman"
-        size = (TILE_SIZE, TILE_SIZE)
+        size = (TILE_SIZE * 1.25, TILE_SIZE * 1.25)
         for i in range(1, 4):
             image_path = os.path.join(base_path, f"{i}.png")
             image = pygame.image.load(image_path).convert_alpha()
@@ -144,3 +143,10 @@ class Player(pygame.sprite.Sprite):
         offset = self.angles[self.desired_direction][1]
         arrow_rect = rotated_arrow.get_rect(center=(self.rect.centerx + offset[0], self.rect.centery + offset[1]))
         return rotated_arrow, arrow_rect.topleft
+
+    def draw(self, screen):
+        # Calculate the top-left position to blit the image centered on the rect
+        top_left_x = self.rect.centerx - self.image.get_width() / 2
+        top_left_y = self.rect.centery - self.image.get_height() / 2
+        # Blit the image at the calculated position
+        screen.blit(self.image, (top_left_x, top_left_y))
