@@ -9,6 +9,7 @@ class PauseMenu:
         self.uifont = uifont
         self.title_font = title_font
         self.current_menu = 'pause menu'
+        self.menu_stack = []  # Stack to keep track of menu history
         self.menu_selected = 0
         self.pause_menu = {
             "pause menu": {
@@ -68,6 +69,14 @@ class PauseMenu:
                 return self.handle_action(action)
         
         elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                if self.current_menu == 'pause menu':
+                    return True, False  # Resume game
+                else:
+                    self.current_menu = self.menu_stack.pop() if self.menu_stack else 'pause menu'
+                    self.menu_selected = 0
+                    self.create_elements()
+                    return True, True  # Remain paused
             if self.menu_selected is None:
                 self.menu_selected = 0
             elif event.key == pygame.K_UP:
@@ -87,6 +96,8 @@ class PauseMenu:
         elif action == 0:
             return False, False  # Quit game
         elif isinstance(action, str) and action in self.pause_menu:
+            if self.current_menu != action:
+                self.menu_stack.append(self.current_menu)  # Push current menu to stack
             self.current_menu = action
             self.menu_selected = None
             self.create_elements()

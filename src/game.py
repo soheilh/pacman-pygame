@@ -71,7 +71,10 @@ class Game:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.paused = not self.paused  # Toggle pause state
+                    if self.paused:
+                        self.running, self.paused = self.pause_menu.events(event)
+                    else:
+                        self.paused = True  # Pause the game
                 elif self.paused:
                     self.running, self.paused = self.pause_menu.events(event)
             elif event.type == pygame.MOUSEMOTION and self.paused:
