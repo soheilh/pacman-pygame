@@ -8,7 +8,7 @@ class Button:
         self.color = color
         self.hover_color = hover_color
         self.rect_hover_color = rect_hover_color
-        self.text_input = text_input
+        self.text_input = text_input.upper()
         self.text = self.font.render(self.text_input, True, self.color)
         self.rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
         
