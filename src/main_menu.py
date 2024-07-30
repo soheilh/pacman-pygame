@@ -2,7 +2,7 @@ import pygame
 from components.button import Button
 from components.selector import Selector
 from components.slider import Slider
-from settings import WHITE, BLACK
+from settings import WHITE, BLACK, MENU_BG_COLOR
 
 class MainMenu:
     def __init__(self, screen, font, bold_font, title_font):
@@ -75,9 +75,8 @@ class MainMenu:
                             self.right_elements[title].append((Button(pos=pos, text_input=text, action=action["value"], **common_args), action))
 
     def draw(self, screen):
-        screen.fill((10, 16, 20))
-
-        self.left_menu_surface.fill((10, 16, 20))
+        screen.fill(MENU_BG_COLOR)
+        self.left_menu_surface.fill(MENU_BG_COLOR)
         title_text = self.title_font.render(self.current_menu.upper(), True, WHITE)
         title_text_rect = title_text.get_rect(topleft=(50, self.left_menu_surface.get_height() / 3))
         self.left_menu_surface.blit(title_text, title_text_rect)
@@ -90,7 +89,7 @@ class MainMenu:
             element.update()
         self.screen.blit(self.left_menu_surface, (0, self.screen.get_height() / 8))
 
-        self.right_menu_surface.fill((10, 16, 20))
+        self.right_menu_surface.fill(MENU_BG_COLOR)
         if self.current_menu == "options" and not self.right_menu_status:
             right_menu_key = self.left_elements[self.left_menu_item].action
             if right_menu_key in self.right_elements:
