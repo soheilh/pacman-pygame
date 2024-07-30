@@ -62,9 +62,11 @@ class MainMenu:
                 submenu = self.main_menu[item["value"]]
                 if submenu:
                     self.right_elements[title] = []
+                    num_submenu_items = len(submenu)
+                    starting_y = (self.right_menu_surface.get_height() - (num_submenu_items - 1) * 60) / 2  # Adjusting the starting Y position
                     for j, (text, action) in enumerate(submenu.items()):
                         common_args = {'screen': self.right_menu_surface, 'font': self.font, 'bold_font': self.bold_font, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
-                        pos = (0, self.right_menu_surface.get_height() / 3 + j * 60)
+                        pos = (0, starting_y + j * 60)
                         if action["type"] == "selector":
                             self.right_elements[title].append((Selector(pos=pos, padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
