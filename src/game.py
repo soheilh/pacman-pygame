@@ -6,6 +6,10 @@ from settings import *
 from level import load_level
 from components.pause_menu import PauseMenu
 
+# Set the process DPI awareness
+import ctypes
+ctypes.windll.user32.SetProcessDPIAware()
+
 class Game:
     def __init__(self):
         self.init_pygame()
@@ -15,7 +19,7 @@ class Game:
         self.init_game_objects()
         self.running = True
         self.paused = False
-        self.pause_menu = PauseMenu(self.screen, self.uifont, self.title_font)  # Initialize PauseMenu
+        self.pause_menu = PauseMenu(self.screen, self.uifont, self.title_font)
 
     def init_pygame(self):
         pygame.init()
@@ -23,18 +27,25 @@ class Game:
         self.clock = pygame.time.Clock()
 
     def load_resources(self):
-        try:
-            self.uifont = pygame.font.Font("assets/fonts/emulogic.ttf", 16)
-            self.title_font = pygame.font.Font("assets/fonts/emulogic.ttf", 40)
-        except pygame.error as e:
-            print(f"Error loading font: {e}")
-            pygame.quit()
-            exit()
+        fonts = [
+            ("uifont", "assets/fonts/emulogic.ttf", 16),
+            ("title_font", "assets/fonts/emulogic.ttf", 40),
+        ]
+        for attr, path, size in fonts:
+            try:
+                setattr(self, attr, pygame.font.Font(path, size))
+            except pygame.error as e:
+                print(f"Error loading font {path}: {e}")
+                pygame.quit()
+                exit()
 
     def setup_display(self):
-        self.screen_width = 1920
-        self.screen_height = 1080
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.screen_width, self.screen_height = RESOLUTION
+        display_mode = pygame.FULLSCREEN if DISPLAY_MODE == "fullscreen" else pygame.RESIZABLE
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), display_mode)
+        self.update_offsets()
+
+    def update_offsets(self):
         self.x_offset = (self.screen_width - GAME_WIDTH) / 2
         self.y_offset = (self.screen_height - GAME_HEIGHT) / 2
 
@@ -74,13 +85,18 @@ class Game:
                     if self.paused:
                         self.running, self.paused = self.pause_menu.events(event)
                     else:
-                        self.paused = True  # Pause the game
+                        self.paused = True
                 elif self.paused:
                     self.running, self.paused = self.pause_menu.events(event)
             elif event.type == pygame.MOUSEMOTION and self.paused:
                 self.pause_menu.events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.paused:
                 self.running, self.paused = self.pause_menu.events(event)
+            elif event.type == VIDEORESIZE:
+                self.screen_width, self.screen_height = event.size
+                self.update_offsets()
+                display_mode = pygame.FULLSCREEN if DISPLAY_MODE == "fullscreen" else pygame.RESIZABLE
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), display_mode)
 
     def update(self, delta_time):
         keys = pygame.key.get_pressed()
@@ -116,9 +132,7 @@ class Game:
         self.scores.draw(self.map_area_surface)
         self.player.draw(self.map_area_surface)
         
-        # Dynamically check the updated setting
-        show_direction_arrow = getattr(settings, "SHOW_DIRECTION_ARROW")
-        if show_direction_arrow:
+        if getattr(settings, "SHOW_DIRECTION_ARROW"):
             direction_arrow = self.player.draw_direction_arrow()
             self.map_area_surface.blit(direction_arrow[0], direction_arrow[1])
         
