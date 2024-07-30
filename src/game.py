@@ -4,6 +4,7 @@ from sprites.player import Player
 import settings
 from settings import *
 from level import load_level
+from main_menu import MainMenu
 from components.pause_menu import PauseMenu
 
 # Set the process DPI awareness
@@ -19,7 +20,9 @@ class Game:
         self.init_game_objects()
         self.running = True
         self.paused = False
+        self.main_menu = MainMenu(self.screen, self.oxanium_font, self.oxanium_bold_font, self.oxanium_title_font)
         self.pause_menu = PauseMenu(self.screen, self.uifont, self.title_font)
+        self.show_main_menu = True
 
     def init_pygame(self):
         pygame.init()
@@ -30,6 +33,9 @@ class Game:
         fonts = [
             ("uifont", "assets/fonts/emulogic.ttf", 16),
             ("title_font", "assets/fonts/emulogic.ttf", 40),
+            ("oxanium_font", "assets/fonts/Oxanium-Medium.ttf", 24),
+            ("oxanium_bold_font", "assets/fonts/Oxanium-ExtraBold.ttf", 24),
+            ("oxanium_title_font", "assets/fonts/Oxanium-ExtraBold.ttf", 60),
         ]
         for attr, path, size in fonts:
             try:
@@ -72,14 +78,22 @@ class Game:
         while self.running:
             self.events()
             delta_time = self.clock.tick(FPS) / 1000.0
-            if not self.paused:
+            if self.show_main_menu:
+                self.main_menu.draw(self.screen)
+            elif not self.paused:
                 self.update(delta_time)
-            self.draw()
+                self.draw()
+            else:
+                self.draw()  # Draw game in background
+                self.pause_menu.draw()
+            pygame.display.flip()
 
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            elif self.show_main_menu:
+                self.running, self.show_main_menu = self.main_menu.events(event)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if self.paused:
@@ -114,7 +128,6 @@ class Game:
         if self.paused:
             self.pause_menu.apply_blur_effect()
             self.pause_menu.draw()
-        pygame.display.flip()
 
     def draw_ui(self):
         self.top_ui_surface.fill(BLACK)
