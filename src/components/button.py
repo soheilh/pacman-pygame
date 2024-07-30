@@ -1,7 +1,8 @@
 import pygame
 
 class Button:
-    def __init__(self, pos, text_input, action, font, bold_font, color, hover_color, rect_hover_color):
+    def __init__(self, screen, pos, text_input, action, font, bold_font, color, hover_color, rect_hover_color):
+        self.screen = screen
         self.x_pos, self.y_pos = pos
         self.action = action
         self.font = font
@@ -13,16 +14,16 @@ class Button:
         self.text = self.font.render(self.text_input, True, self.color)
         self.rect = self.text.get_rect(topleft=(self.x_pos, self.y_pos))
         
-    def update(self, screen):
-        screen.blit(self.text, self.rect)
+    def update(self):
+        self.screen.blit(self.text, self.rect)
     
     def check_for_input(self, position):
         return self.rect.collidepoint(position)
     
-    def change_style(self, _):
+    def change_style(self):
         self.text = self.bold_font.render(self.text_input, True, self.hover_color)
 
-    def reset_style(self, _):
+    def reset_style(self):
         self.text = self.font.render(self.text_input, True, self.color)
 
     def event(self, event):

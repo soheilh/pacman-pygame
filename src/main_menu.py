@@ -55,7 +55,7 @@ class MainMenu:
 
         for i, title in enumerate(menu_options):
             pos = (50, self.left_menu_surface.get_height() / 2 + i * 40)
-            self.left_elements.append(Button(text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=WHITE))
+            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=WHITE))
 
             item = menu_options.get(title, {})
             if item["type"] == "button" and item["value"] in self.main_menu:
@@ -63,12 +63,12 @@ class MainMenu:
                 if submenu:
                     self.right_elements[title] = []
                     for j, (text, action) in enumerate(submenu.items()):
-                        common_args = {'font': self.font, 'bold_font': self.bold_font, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
+                        common_args = {'screen': self.right_menu_surface, 'font': self.font, 'bold_font': self.bold_font, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
                         pos = (0, self.right_menu_surface.get_height() / 3 + j * 60)
                         if action["type"] == "selector":
-                            self.right_elements[title].append((Selector(screen=self.right_menu_surface, pos=pos, padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Selector(pos=pos, padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
-                            self.right_elements[title].append((Slider(screen=self.right_menu_surface, pos=pos, padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Slider(pos=pos, padding=10, name=text, range_values=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "button":
                             self.right_elements[title].append((Button(pos=pos, text_input=text, action=action["value"], **common_args), action))
 
@@ -82,10 +82,10 @@ class MainMenu:
 
         for i, element in enumerate(self.left_elements):
             if i == self.left_menu_item:
-                element.change_style(self.left_menu_surface)
+                element.change_style()
             else:
-                element.reset_style(self.left_menu_surface)
-            element.update(self.left_menu_surface)
+                element.reset_style()
+            element.update()
         self.screen.blit(self.left_menu_surface, (0, self.screen.get_height() / 8))
 
         self.right_menu_surface.fill((10, 16, 20))
@@ -93,17 +93,17 @@ class MainMenu:
             right_menu_key = self.left_elements[self.left_menu_item].action
             if right_menu_key in self.right_elements:
                 for element, _ in self.right_elements[right_menu_key]:
-                    element.reset_style(self.right_menu_surface)
-                    element.update(self.right_menu_surface)
+                    element.reset_style()
+                    element.update()
         elif self.right_menu_status:
             right_menu_key = self.left_elements[self.left_menu_item].action
             if right_menu_key in self.right_elements:
                 for i, (element, _) in enumerate(self.right_elements[right_menu_key]):
                     if i == self.right_menu_item:
-                        element.change_style(self.right_menu_surface)
+                        element.change_style()
                     else:
-                        element.reset_style(self.right_menu_surface)
-                    element.update(self.right_menu_surface)
+                        element.reset_style()
+                    element.update()
         self.screen.blit(self.right_menu_surface, (self.screen.get_width() / 4, self.screen.get_height() / 8))
 
     def events(self, event):

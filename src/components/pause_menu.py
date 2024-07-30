@@ -29,9 +29,9 @@ class PauseMenu:
         menu_options = self.pause_menu[self.current_menu]
         for i, (text, action) in enumerate(menu_options.items()):
             pos = (self.screen.get_width() // 2, self.screen.get_height() // 2 + i * 40)
-            common_args = {'pos': pos, 'font': self.uifont, 'bold_font': self.uifont, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
+            common_args = {'screen': self.screen, 'pos': pos, 'font': self.uifont, 'bold_font': self.uifont, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
             if action["type"] == "selector":
-                self.elements.append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
+                self.elements.append((Selector(padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
             elif action["type"] == "button":
                 self.elements.append((Button(text_input=text, action=action["value"], **common_args), action))
 
@@ -41,10 +41,10 @@ class PauseMenu:
         self.screen.blit(title_text, title_text_rect)
         for i, (element, _) in enumerate(self.elements):
             if i == self.menu_selected:
-                element.change_style(self.screen)
+                element.change_style()
             else:
-                element.reset_style(self.screen)
-            element.update(self.screen)
+                element.reset_style()
+            element.update()
 
     def apply_blur_effect(self):
         scale_down_factor = 0.1
