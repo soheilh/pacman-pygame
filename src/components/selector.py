@@ -6,13 +6,13 @@ class Selector:
     RIGHT_ARROW_HOVER_PATH = "assets/images/ui/right_arrow_black.png"
     ARROW_SIZE = (20, 20)
 
-    def __init__(self, screen, pos, padding, name, options, action, font, bold_font, color, hover_color, rect_hover_color):
+    def __init__(self, screen, pos, padding, name, options, action, font, font_size, color, hover_color, rect_hover_color):
         self.screen = screen
         self.x_pos, self.y_pos = pos
         self.padding = padding
         self.action = action
         self.font = font
-        self.bold_font = bold_font
+        self.font_size = font_size
         self.color = color
         self.hover_color = hover_color
         self.rect_hover_color = rect_hover_color
@@ -34,14 +34,14 @@ class Selector:
         return pygame.transform.scale(image, size)
 
     def update_texts(self, color):
-        self.name_text = self.font.render(self.name, True, color)
-        self.option_text = self.font.render(str(self.options[self.current_option]).title(), True, color)
+        self.name_text, self.name_rect = self.font.render(self.name, color, size=self.font_size)
+        self.option_text, self.option_text_rect = self.font.render(str(self.options[self.current_option]).title(), color, size=self.font_size)
 
     def update_rect(self):
-        self.name_rect = self.name_text.get_rect(topleft=(self.x_pos + self.padding, self.y_pos))
+        self.name_rect.topleft = (self.x_pos + self.padding, self.y_pos)
         self.option_rect = pygame.Rect(0, 0, self.max_option_width, self.option_text.get_height())
         self.option_rect.topright = (self.screen.get_width() - self.padding, self.y_pos)
-        self.option_text_rect = self.option_text.get_rect(center=self.option_rect.center)
+        self.option_text_rect.center = self.option_rect.center
         self.left_arrow_rect = self.left_arrow.get_rect(midleft=(self.option_rect.left, self.option_rect.centery))
         self.right_arrow_rect = self.right_arrow.get_rect(midright=(self.option_rect.right, self.option_rect.centery))
 
@@ -51,7 +51,7 @@ class Selector:
             max(self.name_rect.right, self.right_arrow_rect.right) - min(self.name_rect.left, self.left_arrow_rect.left) + 40,
             max(self.name_rect.bottom, self.option_rect.bottom) - min(self.name_rect.top, self.option_rect.top) + 20
         )
-    
+
     def update(self):
         self.screen.blit(self.name_text, self.name_rect)
         self.screen.blit(self.option_text, self.option_text_rect)
@@ -69,6 +69,7 @@ class Selector:
 
     def change_style(self):
         self.update_texts(self.hover_color)
+        self.update_rect()
         pygame.draw.rect(self.screen, self.rect_hover_color, self.rect)
         self.draw_hover_arrows()
         self.update()
@@ -81,6 +82,7 @@ class Selector:
 
     def reset_style(self):
         self.update_texts(self.color)
+        self.update_rect()
         self.draw_arrows()
         self.update()
         pygame.draw.line(

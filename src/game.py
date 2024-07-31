@@ -1,4 +1,5 @@
 import pygame
+import pygame.freetype
 from pygame.locals import *
 from sprites.player import Player
 import settings
@@ -20,8 +21,8 @@ class Game:
         self.init_game_objects()
         self.running = True
         self.paused = False
-        self.main_menu = MainMenu(self.screen, self.oxanium_font, self.oxanium_bold_font, self.oxanium_title_font)
-        self.pause_menu = PauseMenu(self.screen, self.uifont, self.title_font)
+        self.main_menu = MainMenu(self.screen, self.oxanium, self.oxanium_bold)
+        self.pause_menu = PauseMenu(self.screen, self.uifont, self.uifont)
         self.show_main_menu = True
 
     def init_pygame(self):
@@ -31,15 +32,13 @@ class Game:
 
     def load_resources(self):
         fonts = [
-            ("uifont", "assets/fonts/emulogic.ttf", 16),
-            ("title_font", "assets/fonts/emulogic.ttf", 40),
-            ("oxanium_font", "assets/fonts/Oxanium-Medium.ttf", 24),
-            ("oxanium_bold_font", "assets/fonts/Oxanium-ExtraBold.ttf", 24),
-            ("oxanium_title_font", "assets/fonts/Oxanium-ExtraBold.ttf", 60),
+            ("uifont", "assets/fonts/emulogic.ttf"),
+            ("oxanium", "assets/fonts/Oxanium-Medium.ttf"),
+            ("oxanium_bold", "assets/fonts/Oxanium-ExtraBold.ttf"),
         ]
-        for attr, path, size in fonts:
+        for attr, path in fonts:
             try:
-                setattr(self, attr, pygame.font.Font(path, size))
+                setattr(self, attr, pygame.freetype.Font(path))
             except pygame.error as e:
                 print(f"Error loading font {path}: {e}")
                 pygame.quit()
@@ -131,8 +130,8 @@ class Game:
 
     def draw_ui(self):
         self.top_ui_surface.fill(BLACK)
-        score_text = self.uifont.render(f"Score: {self.player.score:02}", True, WHITE)
-        score_text_rect = score_text.get_rect(center=(GAME_WIDTH // 2, self.top_ui_height // 2))
+        score_text, score_text_rect = self.uifont.render(f"Score: {self.player.score:02}", WHITE, size=16)
+        score_text_rect.center = (GAME_WIDTH // 2, self.top_ui_height // 2)
         self.top_ui_surface.blit(score_text, score_text_rect)
         self.game_surface.blit(self.top_ui_surface, (0, 0))
 

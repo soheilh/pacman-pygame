@@ -29,15 +29,15 @@ class PauseMenu:
         menu_options = self.pause_menu[self.current_menu]
         for i, (text, action) in enumerate(menu_options.items()):
             pos = (self.screen.get_width() // 2, self.screen.get_height() // 2 + i * 40)
-            common_args = {'screen': self.screen, 'pos': pos, 'font': self.uifont, 'bold_font': self.uifont, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
+            common_args = {'screen': self.screen, 'pos': pos, 'font': self.uifont, 'font_size': 16, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
             if action["type"] == "selector":
                 self.elements.append((Selector(padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
             elif action["type"] == "button":
-                self.elements.append((Button(text_input=text, action=action["value"], **common_args), action))
+                self.elements.append((Button(text_input=text, bold_font=self.uifont, action=action["value"], **common_args), action))
 
     def draw(self):
-        title_text = self.title_font.render(self.current_menu.upper(), True, WHITE)
-        title_text_rect = title_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 3))
+        title_text, title_text_rect = self.title_font.render(self.current_menu.upper(), WHITE, size=60)
+        title_text_rect.center = (self.screen.get_width() // 2, self.screen.get_height() // 3)
         self.screen.blit(title_text, title_text_rect)
         for i, (element, _) in enumerate(self.elements):
             if i == self.menu_selected:

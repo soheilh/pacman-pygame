@@ -6,13 +6,13 @@ class Slider:
     RIGHT_ARROW_HOVER_PATH = "assets/images/ui/right_arrow_black.png"
     ARROW_SIZE = (20, 20)
 
-    def __init__(self, screen, pos, padding, name, range_values, action, font, bold_font, color, hover_color, rect_hover_color):
+    def __init__(self, screen, pos, padding, name, range_values, action, font, font_size, color, hover_color, rect_hover_color):
         self.screen = screen
         self.x_pos, self.y_pos = pos
         self.padding = padding
         self.action = action
         self.font = font
-        self.bold_font = bold_font
+        self.font_size = font_size
         self.color = color
         self.hover_color = hover_color
         self.rect_hover_color = rect_hover_color
@@ -36,10 +36,10 @@ class Slider:
         return pygame.transform.scale(image, size)
 
     def update_texts(self, color):
-        self.name_text = self.font.render(self.name, True, color)
+        self.name_text, self.name_rect = self.font.render(self.name, color, size=self.font_size)
 
     def update_rect(self):
-        self.name_rect = self.name_text.get_rect(topleft=(self.x_pos + self.padding, self.y_pos))
+        self.name_rect.topleft = (self.x_pos + self.padding, self.y_pos)
         self.option_rect = pygame.Rect(0, 0, self.option_width, self.name_rect.height)
         self.option_rect.topright = (self.screen.get_width() - self.padding, self.y_pos)
         self.bar_rect = pygame.Rect(0, 0, self.bar_width, self.bar_height)
@@ -78,6 +78,7 @@ class Slider:
 
     def change_style(self):
         self.update_texts(self.hover_color)
+        self.update_rect()
         pygame.draw.rect(self.screen, self.rect_hover_color, self.rect)
         self.draw_hover_arrows()
         pygame.draw.rect(self.screen, self.hover_color, self.bar_rect)
@@ -91,6 +92,7 @@ class Slider:
 
     def reset_style(self):
         self.update_texts(self.color)
+        self.update_rect()
         self.draw_arrows()
         pygame.draw.rect(self.screen, self.color, self.bar_rect)
         pygame.draw.rect(self.screen, self.color, self.knob_rect)

@@ -5,11 +5,10 @@ from components.slider import Slider
 from settings import WHITE, BLACK, MENU_BG_COLOR
 
 class MainMenu:
-    def __init__(self, screen, font, bold_font, title_font):
+    def __init__(self, screen, font, bold_font):
         self.screen = screen
         self.font = font
         self.bold_font = bold_font
-        self.title_font = title_font
         self.current_menu = "main menu"
         self.menu_stack = []
         self.left_menu_item = 0
@@ -55,7 +54,7 @@ class MainMenu:
 
         for i, title in enumerate(menu_options):
             pos = (50, self.left_menu_surface.get_height() / 2 + i * 40)
-            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=WHITE))
+            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=WHITE))
 
             item = menu_options.get(title, {})
             if item["type"] == "button" and item["value"] in self.main_menu:
@@ -65,20 +64,20 @@ class MainMenu:
                     num_submenu_items = len(submenu)
                     starting_y = (self.right_menu_surface.get_height() - (num_submenu_items - 1) * 60) / 2  # Adjusting the starting Y position
                     for j, (text, action) in enumerate(submenu.items()):
-                        common_args = {'screen': self.right_menu_surface, 'font': self.font, 'bold_font': self.bold_font, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
                         pos = (0, starting_y + j * 60)
+                        common_args = {'pos': pos, 'screen': self.right_menu_surface, 'font': self.font, 'font_size': 24, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
                         if action["type"] == "selector":
-                            self.right_elements[title].append((Selector(pos=pos, padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Selector(padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
-                            self.right_elements[title].append((Slider(pos=pos, padding=10, name=text, range_values=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Slider(padding=10, name=text, range_values=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "button":
-                            self.right_elements[title].append((Button(pos=pos, text_input=text, action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Button(text_input=text, bold_font=self.bold_font, action=action["value"], **common_args), action))
 
     def draw(self, screen):
         screen.fill(MENU_BG_COLOR)
         self.left_menu_surface.fill(MENU_BG_COLOR)
-        title_text = self.title_font.render(self.current_menu.upper(), True, WHITE)
-        title_text_rect = title_text.get_rect(topleft=(50, self.left_menu_surface.get_height() / 3))
+        title_text, title_text_rect = self.bold_font.render(self.current_menu.upper(), WHITE, size=60)
+        title_text_rect.topleft = (50, self.left_menu_surface.get_height() / 3)
         self.left_menu_surface.blit(title_text, title_text_rect)
 
         for i, element in enumerate(self.left_elements):
