@@ -38,9 +38,9 @@ class Selector:
         self.option_text, self.option_text_rect = self.font.render(str(self.options[self.current_option]).title(), color, size=self.font_size)
 
     def update_rect(self):
-        self.name_rect.topleft = (self.x_pos + self.padding, self.y_pos)
+        self.name_rect.midleft = (self.x_pos + self.padding, self.y_pos)
         self.option_rect = pygame.Rect(0, 0, self.max_option_width, self.option_text.get_height())
-        self.option_rect.topright = (self.screen.get_width() - self.padding, self.y_pos)
+        self.option_rect.midright = (self.screen.get_width() - self.padding, self.y_pos)
         self.option_text_rect.center = self.option_rect.center
         self.left_arrow_rect = self.left_arrow.get_rect(midleft=(self.option_rect.left, self.option_rect.centery))
         self.right_arrow_rect = self.right_arrow.get_rect(midright=(self.option_rect.right, self.option_rect.centery))
