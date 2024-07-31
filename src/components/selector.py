@@ -5,11 +5,12 @@ class Selector:
     RIGHT_ARROW_PATH = "assets/images/ui/right_arrow_white.png"
     RIGHT_ARROW_HOVER_PATH = "assets/images/ui/right_arrow_black.png"
     ARROW_SIZE = (20, 20)
+    MAX_OPTION_WIDTH = 220
+    PADDING = 20
 
-    def __init__(self, screen, pos, padding, name, options, action, font, font_size, color, hover_color, rect_hover_color):
+    def __init__(self, screen, pos, name, options, action, font, font_size, color, hover_color, rect_hover_color):
         self.screen = screen
         self.x_pos, self.y_pos = pos
-        self.padding = padding
         self.action = action
         self.font = font
         self.font_size = font_size
@@ -19,7 +20,6 @@ class Selector:
         self.name = name.title()
         self.options = options
         self.current_option = self.options.index(getattr(settings, self.action))
-        self.max_option_width = 220
 
         self.right_arrow = self.load_and_scale_image(self.RIGHT_ARROW_PATH, self.ARROW_SIZE)
         self.left_arrow = pygame.transform.flip(self.right_arrow, True, False)
@@ -38,18 +38,18 @@ class Selector:
         self.option_text, self.option_text_rect = self.font.render(str(self.options[self.current_option]).title(), color, size=self.font_size)
 
     def update_rect(self):
-        self.name_rect.midleft = (self.x_pos + self.padding, self.y_pos)
-        self.option_rect = pygame.Rect(0, 0, self.max_option_width, self.option_text.get_height())
-        self.option_rect.midright = (self.screen.get_width() - self.padding, self.y_pos)
+        self.name_rect.midleft = (self.x_pos + self.PADDING, self.y_pos)
+        self.option_rect = pygame.Rect(0, 0, self.MAX_OPTION_WIDTH, self.option_text.get_height())
+        self.option_rect.midright = (self.screen.get_width() - self.PADDING, self.y_pos)
         self.option_text_rect.center = self.option_rect.center
         self.left_arrow_rect = self.left_arrow.get_rect(midleft=(self.option_rect.left, self.option_rect.centery))
         self.right_arrow_rect = self.right_arrow.get_rect(midright=(self.option_rect.right, self.option_rect.centery))
 
         self.rect = pygame.Rect(
-            min(self.name_rect.left, self.left_arrow_rect.left) - 20,
-            min(self.name_rect.top, self.option_rect.top) - 10,
-            max(self.name_rect.right, self.right_arrow_rect.right) - min(self.name_rect.left, self.left_arrow_rect.left) + 40,
-            max(self.name_rect.bottom, self.option_rect.bottom) - min(self.name_rect.top, self.option_rect.top) + 20
+            min(self.name_rect.left, self.left_arrow_rect.left) - self.PADDING,
+            self.y_pos - 35,
+            max(self.name_rect.right, self.right_arrow_rect.right) - min(self.name_rect.left, self.left_arrow_rect.left) + self.PADDING * 2,
+            70
         )
 
     def update(self):

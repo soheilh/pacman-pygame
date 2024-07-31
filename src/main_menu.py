@@ -62,14 +62,14 @@ class MainMenu:
                 if submenu:
                     self.right_elements[title] = []
                     num_submenu_items = len(submenu)
-                    starting_y = (self.right_menu_surface.get_height() - (num_submenu_items - 1) * 60) / 2  # Adjusting the starting Y position
+                    starting_y = (self.right_menu_surface.get_height() - (num_submenu_items - 1) * 70) / 2  # Adjusting the starting Y position
                     for j, (text, action) in enumerate(submenu.items()):
-                        pos = (0, starting_y + j * 60)
+                        pos = (0, starting_y + j * 70)
                         common_args = {'pos': pos, 'screen': self.right_menu_surface, 'font': self.font, 'font_size': 24, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
                         if action["type"] == "selector":
-                            self.right_elements[title].append((Selector(padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
-                            self.right_elements[title].append((Slider(padding=10, name=text, range_values=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements[title].append((Slider(name=text, range_values=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "button":
                             self.right_elements[title].append((Button(text_input=text, bold_font=self.bold_font, action=action["value"], **common_args), action))
 

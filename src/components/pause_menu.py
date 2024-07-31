@@ -31,7 +31,7 @@ class PauseMenu:
             pos = (self.screen.get_width() // 2, self.screen.get_height() // 2 + i * 40)
             common_args = {'screen': self.screen, 'pos': pos, 'font': self.uifont, 'font_size': 16, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
             if action["type"] == "selector":
-                self.elements.append((Selector(padding=10, name=text, options=action["options"], action=action["value"], **common_args), action))
+                self.elements.append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
             elif action["type"] == "button":
                 self.elements.append((Button(text_input=text, bold_font=self.uifont, action=action["value"], **common_args), action))
 
