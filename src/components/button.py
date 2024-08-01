@@ -22,11 +22,9 @@ class Button:
     def check_for_input(self, position):
         return self.rect.collidepoint(position)
     
-    def change_style(self):
-        self.text, _ = self.bold_font.render(self.text_input, self.hover_color, size=self.font_size)
-    
-    def reset_style(self):
-        self.text, _ = self.font.render(self.text_input, self.color, size=self.font_size)
+    def change_style(self, hover=False):
+        font, color = (self.bold_font, self.hover_color) if hover else (self.font, self.color)
+        self.text, _ = font.render(self.text_input, color, size=self.font_size)
 
     def event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.check_for_input(event.pos):

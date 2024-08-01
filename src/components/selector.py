@@ -2,8 +2,6 @@ import pygame
 import settings
 
 class Selector:
-    RIGHT_ARROW_PATH = "assets/images/ui/right_arrow_white.png"
-    RIGHT_ARROW_HOVER_PATH = "assets/images/ui/right_arrow_black.png"
     ARROW_SIZE = (20, 20)
     MAX_OPTION_WIDTH = 220
     PADDING = 20
@@ -21,13 +19,23 @@ class Selector:
         self.options = options
         self.current_option = self.options.index(getattr(settings, self.action))
 
-        self.right_arrow = self.load_and_scale_image(self.RIGHT_ARROW_PATH, self.ARROW_SIZE)
+        self.right_arrow, self.right_arrow_hover = self.load_arrows()
         self.left_arrow = pygame.transform.flip(self.right_arrow, True, False)
-        self.right_arrow_hover = self.load_and_scale_image(self.RIGHT_ARROW_HOVER_PATH, self.ARROW_SIZE)
         self.left_arrow_hover = pygame.transform.flip(self.right_arrow_hover, True, False)
 
         self.update_texts(self.color)
         self.update_rect()
+
+    def load_arrows(self):
+        right_arrow = self.load_and_scale_image("assets/images/ui/right_arrow_white.png", self.ARROW_SIZE)
+        right_arrow_hover = self.load_and_scale_image("assets/images/ui/right_arrow_black.png", self.ARROW_SIZE)
+        return right_arrow, right_arrow_hover
+
+    def draw_arrows(self, hover=False):
+        left_arrow = self.left_arrow_hover if hover else self.left_arrow
+        right_arrow = self.right_arrow_hover if hover else self.right_arrow
+        self.screen.blit(left_arrow, self.left_arrow_rect)
+        self.screen.blit(right_arrow, self.right_arrow_rect)
 
     def load_and_scale_image(self, path, size):
         image = pygame.image.load(path).convert_alpha()
@@ -44,7 +52,6 @@ class Selector:
         self.option_text_rect.center = self.option_rect.center
         self.left_arrow_rect = self.left_arrow.get_rect(midleft=(self.option_rect.left, self.option_rect.centery))
         self.right_arrow_rect = self.right_arrow.get_rect(midright=(self.option_rect.right, self.option_rect.centery))
-
         self.rect = pygame.Rect(
             min(self.name_rect.left, self.left_arrow_rect.left) - self.PADDING,
             self.y_pos - 35,
@@ -56,37 +63,20 @@ class Selector:
         self.screen.blit(self.name_text, self.name_rect)
         self.screen.blit(self.option_text, self.option_text_rect)
 
-    def draw_arrows(self):
-        self.screen.blit(self.left_arrow, self.left_arrow_rect)
-        self.screen.blit(self.right_arrow, self.right_arrow_rect)
-
-    def draw_hover_arrows(self):
-        self.screen.blit(self.left_arrow_hover, self.left_arrow_rect)
-        self.screen.blit(self.right_arrow_hover, self.right_arrow_rect)
-
     def check_for_input(self, position):
         return self.rect.collidepoint(position)
 
-    def change_style(self):
-        self.update_texts(self.hover_color)
+    def change_style(self, hover=False):
+        color = self.hover_color if hover else self.color
+        rect_color = self.rect_hover_color if hover else None
+        self.update_texts(color)
         self.update_rect()
-        pygame.draw.rect(self.screen, self.rect_hover_color, self.rect)
-        self.draw_hover_arrows()
+        if rect_color:
+            pygame.draw.rect(self.screen, rect_color, self.rect)
+        self.draw_arrows(hover)
         self.update()
         pygame.draw.line(
-            self.screen, self.hover_color,
-            (self.name_rect.right + 10, self.name_rect.centery),
-            (self.option_rect.left - 10, self.option_rect.centery),
-            1
-        )
-
-    def reset_style(self):
-        self.update_texts(self.color)
-        self.update_rect()
-        self.draw_arrows()
-        self.update()
-        pygame.draw.line(
-            self.screen, self.color,
+            self.screen, color,
             (self.name_rect.right + 10, self.name_rect.centery),
             (self.option_rect.left - 10, self.option_rect.centery),
             1

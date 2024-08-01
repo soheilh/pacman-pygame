@@ -82,9 +82,9 @@ class MainMenu:
 
         for i, element in enumerate(self.left_elements):
             if i == self.left_menu_item:
-                element.change_style()
+                element.change_style(True)
             else:
-                element.reset_style()
+                element.change_style(False)
             element.update()
         self.screen.blit(self.left_menu_surface, (0, self.screen.get_height() / 8))
 
@@ -93,16 +93,16 @@ class MainMenu:
             right_menu_key = self.left_elements[self.left_menu_item].action
             if right_menu_key in self.right_elements:
                 for element, _ in self.right_elements[right_menu_key]:
-                    element.reset_style()
+                    element.change_style(False)
                     element.update()
         elif self.right_menu_status:
             right_menu_key = self.left_elements[self.left_menu_item].action
             if right_menu_key in self.right_elements:
                 for i, (element, _) in enumerate(self.right_elements[right_menu_key]):
                     if i == self.right_menu_item:
-                        element.change_style()
+                        element.change_style(True)
                     else:
-                        element.reset_style()
+                        element.change_style(False)
                     element.update()
         self.screen.blit(self.right_menu_surface, (self.screen.get_width() / 4, self.screen.get_height() / 8))
 

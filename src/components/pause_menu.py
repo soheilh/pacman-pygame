@@ -41,9 +41,9 @@ class PauseMenu:
         self.screen.blit(title_text, title_text_rect)
         for i, (element, _) in enumerate(self.elements):
             if i == self.menu_selected:
-                element.change_style()
+                element.change_style(True)
             else:
-                element.reset_style()
+                element.change_style(False)
             element.update()
 
     def apply_blur_effect(self):
