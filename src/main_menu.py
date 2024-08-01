@@ -27,9 +27,9 @@ class MainMenu:
                 "quit": {"type": "button", "value": 0},
             },
             "options": {
-                "gameplay": {"type": "button", "value": "gameplay"},
-                "display": {"type": "button", "value": "display"},
-                "sound": {"type": "button", "value": "sound"},
+                "gameplay": {"type": "button", "value": "gameplay", "right_menu": True},
+                "display": {"type": "button", "value": "display", "right_menu": True},
+                "sound": {"type": "button", "value": "sound", "right_menu": True},
             },
             "gameplay": {
                 "show direction arrow": {"type": "selector", "value": "SHOW_DIRECTION_ARROW", "options": [True, False]},
@@ -58,7 +58,7 @@ class MainMenu:
             self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=WHITE))
 
             item = menu_options.get(title, {})
-            if item["type"] == "button" and item["value"] in self.main_menu:
+            if item["type"] == "button" and item.get("right_menu", False) and item["value"] in self.main_menu:
                 submenu = self.main_menu[item["value"]]
                 if submenu:
                     self.right_elements[title] = []
@@ -87,10 +87,12 @@ class MainMenu:
             else:
                 element.change_style(False)
             element.update()
+        self.draw_right_menu()
         self.screen.blit(self.left_menu_surface, (0, self.screen.get_height() / 8))
 
+    def draw_right_menu(self):
         self.right_menu_surface.fill(MENU_BG_COLOR)
-        if self.current_menu == "options" and not self.right_menu_status:
+        if not self.right_menu_status:
             right_menu_key = self.left_elements[self.left_menu_item].action
             if right_menu_key in self.right_elements:
                 for element, _ in self.right_elements[right_menu_key]:
@@ -130,7 +132,7 @@ class MainMenu:
                     self.left_menu_item = (self.left_menu_item + 1) % len(self.left_elements)
                 elif event.key == pygame.K_RETURN:
                     left_action_key = self.left_elements[self.left_menu_item].action
-                    if left_action_key in self.right_elements and self.current_menu == "options":
+                    if left_action_key in self.right_elements and self.main_menu[self.current_menu][left_action_key].get("right_menu", False):
                         self.right_menu_status = True
                         self.right_menu_item = 0
                     else:
