@@ -11,6 +11,7 @@ class MainMenu:
         self.bold_font = bold_font
         self.current_menu = "main menu"
         self.menu_stack = []
+        self.menu_item_stack = []
         self.left_menu_item = 0
         self.right_menu_item = 0
         self.right_menu_status = False
@@ -141,7 +142,7 @@ class MainMenu:
                         self.right_menu_status = False
                     elif self.menu_stack:
                         self.current_menu = self.menu_stack.pop()
-                        self.left_menu_item = 0
+                        self.left_menu_item = self.menu_item_stack.pop()
                         self.right_menu_item = 0
                         self.right_menu_status = False
                         self.create_elements()
@@ -155,6 +156,7 @@ class MainMenu:
         elif isinstance(action, str) and action in self.main_menu:
             if self.current_menu != action:
                 self.menu_stack.append(self.current_menu)
+                self.menu_item_stack.append(self.left_menu_item)
             self.current_menu = action
             self.left_menu_item = 0
             self.right_menu_item = 0
