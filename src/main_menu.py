@@ -5,7 +5,11 @@ from components.slider import Slider
 from settings import WHITE, BLACK, MENU_BG_COLOR
 
 class MainMenu:
+    ITEM_VERTICAL_SPACING = 70
+    MAX_VISIBLE_ITEMS = 7
+
     def __init__(self, screen, font, bold_font):
+        """Initialize the MainMenu with screen, font, and bold_font."""
         self.screen = screen
         self.font = font
         self.bold_font = bold_font
@@ -15,10 +19,14 @@ class MainMenu:
         self.left_menu_item = 0
         self.right_menu_item = 0
         self.right_menu_status = False
+        self.scroll_offset = 0
 
-        self.left_menu_surface = pygame.Surface((self.screen.get_width() / 4, self.screen.get_height() * 3 / 4))
-        self.right_menu_surface = pygame.Surface((self.screen.get_width() / 2, self.screen.get_height() * 3 / 4))
+        # Create surfaces for left and right menus
+        self.left_menu_surface = pygame.Surface((self.screen.get_width() / 4, self.MAX_VISIBLE_ITEMS * self.ITEM_VERTICAL_SPACING))
+        self.right_menu_surface = pygame.Surface((self.screen.get_width() / 2, self.MAX_VISIBLE_ITEMS * self.ITEM_VERTICAL_SPACING))
+        self.right_menu_content_surface = pygame.Surface((self.right_menu_surface.get_width(), 1000))
 
+        # Define the main menu structure
         self.main_menu = {
             "main menu": {
                 "play": {"type": "button", "value": 1},
@@ -49,6 +57,7 @@ class MainMenu:
         self.create_elements()
 
     def create_elements(self):
+        """Create UI elements for the current menu."""
         self.left_elements = []
         self.right_elements = {}
         menu_options = self.main_menu.get(self.current_menu, {})
@@ -62,11 +71,9 @@ class MainMenu:
                 submenu = self.main_menu[item["value"]]
                 if submenu:
                     self.right_elements[title] = []
-                    num_submenu_items = len(submenu)
-                    starting_y = (self.right_menu_surface.get_height() - (num_submenu_items - 1) * 70) / 2  # Adjusting the starting Y position
                     for j, (text, action) in enumerate(submenu.items()):
-                        pos = (0, starting_y + j * 70)
-                        common_args = {'pos': pos, 'screen': self.right_menu_surface, 'font': self.font, 'font_size': 24, 'color': (229, 229, 229), 'hover_color': BLACK, 'rect_hover_color': WHITE}
+                        pos = (0, j * self.ITEM_VERTICAL_SPACING + 35)
+                        common_args = {'pos': pos, 'screen': self.right_menu_content_surface, 'font': self.font, 'font_size': 24, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
                         if action["type"] == "selector":
                             self.right_elements[title].append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
@@ -75,6 +82,7 @@ class MainMenu:
                             self.right_elements[title].append((Button(text_input=text, bold_font=self.bold_font, action=action["value"], **common_args), action))
 
     def draw(self, screen):
+        """Draw the current menu and its elements on the screen."""
         screen.fill(MENU_BG_COLOR)
         self.left_menu_surface.fill(MENU_BG_COLOR)
         title_text, title_text_rect = self.bold_font.render(self.current_menu.upper(), WHITE, size=60)
@@ -88,28 +96,36 @@ class MainMenu:
                 element.change_style(False)
             element.update()
         self.draw_right_menu()
-        self.screen.blit(self.left_menu_surface, (0, self.screen.get_height() / 8))
+        self.screen.blit(self.left_menu_surface, (0, self.screen.get_height() / 4))
 
     def draw_right_menu(self):
+        """Draw the right-side menu elements."""
         self.right_menu_surface.fill(MENU_BG_COLOR)
-        if not self.right_menu_status:
-            right_menu_key = self.left_elements[self.left_menu_item].action
-            if right_menu_key in self.right_elements:
-                for element, _ in self.right_elements[right_menu_key]:
+        right_menu_key = self.left_elements[self.left_menu_item].action
+        if right_menu_key in self.right_elements:
+            content_height = len(self.right_elements[right_menu_key]) * self.ITEM_VERTICAL_SPACING
+            self.right_menu_content_surface = pygame.transform.scale(self.right_menu_content_surface, (self.right_menu_surface.get_width(), content_height))
+            self.right_menu_content_surface.fill(MENU_BG_COLOR)
+
+            if self.right_menu_status:
+                visible_elements = self.right_elements[right_menu_key][self.scroll_offset:self.scroll_offset + self.MAX_VISIBLE_ITEMS]
+                for i, (element, _) in enumerate(visible_elements):
+                    element.screen = self.right_menu_content_surface
+                    element.change_style(i == (self.right_menu_item - self.scroll_offset))
+                    element.update()
+            else:
+                for element, _ in self.right_elements[right_menu_key][:self.MAX_VISIBLE_ITEMS]:
+                    element.screen = self.right_menu_content_surface
                     element.change_style(False)
                     element.update()
-        elif self.right_menu_status:
-            right_menu_key = self.left_elements[self.left_menu_item].action
-            if right_menu_key in self.right_elements:
-                for i, (element, _) in enumerate(self.right_elements[right_menu_key]):
-                    if i == self.right_menu_item:
-                        element.change_style(True)
-                    else:
-                        element.change_style(False)
-                    element.update()
-        self.screen.blit(self.right_menu_surface, (self.screen.get_width() / 4, self.screen.get_height() / 8))
+            if self.right_menu_content_surface.get_height() <= self.right_menu_surface.get_height():
+                self.right_menu_surface.blit(self.right_menu_content_surface, (0, (self.right_menu_surface.get_height() - self.right_menu_content_surface.get_height()) / 2 - self.scroll_offset * self.ITEM_VERTICAL_SPACING))
+            else:
+                self.right_menu_surface.blit(self.right_menu_content_surface, (0, -self.scroll_offset * self.ITEM_VERTICAL_SPACING))
+        self.screen.blit(self.right_menu_surface, (self.screen.get_width() / 4, self.screen.get_height() / 4))
 
     def events(self, event):
+        """Handle user input events."""
         if event.type == pygame.KEYDOWN:
             if self.right_menu_status:
                 right_menu_key = self.left_elements[self.left_menu_item].action
@@ -117,8 +133,18 @@ class MainMenu:
                     num_elements = len(self.right_elements[right_menu_key])
                     if event.key == pygame.K_UP:
                         self.right_menu_item = (self.right_menu_item - 1) % num_elements
+                        if self.right_menu_item < self.scroll_offset:
+                            self.scroll_offset = self.right_menu_item
+                        elif self.right_menu_item >= self.scroll_offset + self.MAX_VISIBLE_ITEMS:
+                            self.scroll_offset = self.right_menu_item - self.MAX_VISIBLE_ITEMS + 1
+
                     elif event.key == pygame.K_DOWN:
                         self.right_menu_item = (self.right_menu_item + 1) % num_elements
+                        if self.right_menu_item < self.scroll_offset:
+                            self.scroll_offset = self.right_menu_item
+                        elif self.right_menu_item >= self.scroll_offset + self.MAX_VISIBLE_ITEMS:
+                            self.scroll_offset = self.right_menu_item - self.MAX_VISIBLE_ITEMS + 1
+
                     elif event.key in [pygame.K_RETURN, pygame.K_LEFT, pygame.K_RIGHT]:
                         element = self.right_elements[right_menu_key][self.right_menu_item][0]
                         action = element.event(event)
@@ -135,6 +161,7 @@ class MainMenu:
                     if left_action_key in self.right_elements and self.main_menu[self.current_menu][left_action_key].get("right_menu", False):
                         self.right_menu_status = True
                         self.right_menu_item = 0
+                        self.scroll_offset = 0
                     else:
                         element = self.left_elements[self.left_menu_item]
                         action = element.event(event)
@@ -151,6 +178,7 @@ class MainMenu:
         return True, True
 
     def handle_action(self, action):
+        """Process menu actions based on the selected option."""
         if action == 1:
             return True, False
         elif action == 0:
