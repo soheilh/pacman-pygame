@@ -13,13 +13,16 @@ SCORE_COLOR = (255, 186, 157)
 WALL_COLOR = (58, 51, 255)
 MENU_BG_COLOR = (10, 16, 20)
 
-# Options
+# Options - Gameplay
 SHOW_DIRECTION_ARROW = True
+
+# Options - Display
 RESOLUTION = (1920, 1080)
 DISPLAY_MODE = "windowed"
 QUALITY_MODE = "classic"
 VSYNC = 1
 
+# Options - Sound
 MASTER_VOLUME = 5
 MUSIC_VOLUME = 5
 EFFECT_VOLUME = 5

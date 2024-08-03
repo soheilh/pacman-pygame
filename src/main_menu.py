@@ -2,7 +2,7 @@ import pygame
 from components.button import Button
 from components.selector import Selector
 from components.slider import Slider
-from settings import WHITE, BLACK, MENU_BG_COLOR
+import settings
 
 class MainMenu:
     ITEM_VERTICAL_SPACING = 70
@@ -24,7 +24,7 @@ class MainMenu:
         # Create surfaces for left and right menus
         self.left_menu_surface = pygame.Surface((self.screen.get_width() / 4, self.MAX_VISIBLE_ITEMS * self.ITEM_VERTICAL_SPACING))
         self.right_menu_surface = pygame.Surface((self.screen.get_width() / 2, self.MAX_VISIBLE_ITEMS * self.ITEM_VERTICAL_SPACING))
-        self.right_menu_content_surface = pygame.Surface((self.right_menu_surface.get_width(), 1000))
+        self.right_menu_content_surface = pygame.Surface((self.right_menu_surface.get_width(), 0))
 
         # Define the main menu structure
         self.main_menu = {
@@ -64,7 +64,7 @@ class MainMenu:
 
         for i, title in enumerate(menu_options):
             pos = (50, self.left_menu_surface.get_height() / 2 + i * 40)
-            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=WHITE))
+            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=settings.WHITE))
 
             item = menu_options.get(title, {})
             if item["type"] == "button" and item.get("right_menu", False) and item["value"] in self.main_menu:
@@ -73,7 +73,7 @@ class MainMenu:
                     self.right_elements[title] = []
                     for j, (text, action) in enumerate(submenu.items()):
                         pos = (0, j * self.ITEM_VERTICAL_SPACING + 35)
-                        common_args = {'pos': pos, 'screen': self.right_menu_content_surface, 'font': self.font, 'font_size': 24, 'color': WHITE, 'hover_color': BLACK, 'rect_hover_color': WHITE}
+                        common_args = {'pos': pos, 'screen': self.right_menu_content_surface, 'font': self.font, 'font_size': 24, 'color': settings.WHITE, 'hover_color': settings.BLACK, 'rect_hover_color': settings.WHITE}
                         if action["type"] == "selector":
                             self.right_elements[title].append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
@@ -83,10 +83,10 @@ class MainMenu:
 
     def draw(self, screen):
         """Draw the current menu and its elements on the screen."""
-        screen.fill(MENU_BG_COLOR)
-        self.left_menu_surface.fill(MENU_BG_COLOR)
-        title_text, title_text_rect = self.bold_font.render(self.current_menu.upper(), WHITE, size=60)
-        title_text_rect.topleft = (50, self.left_menu_surface.get_height() / 3)
+        screen.fill(settings.MENU_BG_COLOR)
+        self.left_menu_surface.fill(settings.MENU_BG_COLOR)
+        title_text, title_text_rect = self.bold_font.render(self.current_menu.upper(), settings.WHITE, size=70)
+        title_text_rect.topleft = (50, self.left_menu_surface.get_height() / 4)
         self.left_menu_surface.blit(title_text, title_text_rect)
 
         for i, element in enumerate(self.left_elements):
@@ -100,12 +100,12 @@ class MainMenu:
 
     def draw_right_menu(self):
         """Draw the right-side menu elements."""
-        self.right_menu_surface.fill(MENU_BG_COLOR)
+        self.right_menu_surface.fill(settings.MENU_BG_COLOR)
         right_menu_key = self.left_elements[self.left_menu_item].action
         if right_menu_key in self.right_elements:
             content_height = len(self.right_elements[right_menu_key]) * self.ITEM_VERTICAL_SPACING
             self.right_menu_content_surface = pygame.transform.scale(self.right_menu_content_surface, (self.right_menu_surface.get_width(), content_height))
-            self.right_menu_content_surface.fill(MENU_BG_COLOR)
+            self.right_menu_content_surface.fill(settings.MENU_BG_COLOR)
 
             if self.right_menu_status:
                 visible_elements = self.right_elements[right_menu_key][self.scroll_offset:self.scroll_offset + self.MAX_VISIBLE_ITEMS]
