@@ -24,6 +24,9 @@ class Game:
         self.main_menu = MainMenu(self.screen, self.oxanium, self.oxanium_bold)
         self.pause_menu = PauseMenu(self.screen, self.uifont, self.uifont)
         self.show_main_menu = True
+        self.fps_text = None
+        self.fps_rect = None
+        self.fps_timer = 1
 
     def init_pygame(self):
         pygame.init()
@@ -85,7 +88,18 @@ class Game:
             else:
                 self.draw()  # Draw game in background
                 self.pause_menu.draw()
+            if SHOW_FPS:
+                self.update_fps_display(delta_time)
             pygame.display.flip()
+
+    def update_fps_display(self, delta_time):
+        self.fps_timer += delta_time
+        if self.fps_timer >= 1.0:  # Update FPS every second
+            self.fps_text, self.fps_rect = self.oxanium.render("FPS: " + str(int(self.clock.get_fps())), WHITE, size=24)
+            self.fps_timer = 0
+        if self.fps_text and self.fps_rect:
+            self.fps_rect.topleft = (20, 20)
+            self.screen.blit(self.fps_text, self.fps_rect)
 
     def events(self):
         for event in pygame.event.get():

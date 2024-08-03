@@ -21,6 +21,7 @@ RESOLUTION = (1920, 1080)
 DISPLAY_MODE = "windowed"
 QUALITY_MODE = "classic"
 VSYNC = 1
+SHOW_FPS = 1
 
 # Options - Sound
 MASTER_VOLUME = 5
