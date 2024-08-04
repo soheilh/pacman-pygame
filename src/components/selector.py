@@ -41,9 +41,13 @@ class Selector:
         image = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(image, size)
 
+    def format_option_text(self, option):
+        return "On" if option in [1, True] else "Off" if option in [0, False] else str(option).title()
+
     def update_texts(self, color):
         self.name_text, self.name_rect = self.font.render(self.name, color, size=self.font_size)
-        self.option_text, self.option_text_rect = self.font.render(str(self.options[self.current_option]).title(), color, size=self.font_size)
+        option_text = self.format_option_text(self.options[self.current_option])
+        self.option_text, self.option_text_rect = self.font.render(option_text, color, size=self.font_size)
 
     def update_rect(self):
         self.name_rect.midleft = (self.x_pos + self.PADDING, self.y_pos)
