@@ -71,8 +71,7 @@ class Selector:
         return self.rect.collidepoint(position)
 
     def change_style(self, hover=False):
-        color = self.hover_color if hover else self.color
-        rect_color = self.rect_hover_color if hover else None
+        color, rect_color = (self.hover_color, self.rect_hover_color) if hover else (self.color, None)
         self.update_texts(color)
         self.update_rect()
         if rect_color:
