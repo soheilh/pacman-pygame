@@ -13,7 +13,10 @@ class Button:
         self.hover_color = hover_color
         self.rect_hover_color = rect_hover_color
         self.text_input = text_input.upper()
-        self.text, self.rect = self.font.render(self.text_input, self.color, size=self.font_size)
+        self.update_text(self.font, self.color)
+
+    def update_text(self, font, color):
+        self.text, self.rect = font.render(self.text_input, color, size=self.font_size)
         self.rect.topleft = (self.x_pos, self.y_pos)
 
     def update(self):
@@ -23,8 +26,10 @@ class Button:
         return self.rect.collidepoint(position)
     
     def change_style(self, hover=False):
-        font, color = (self.bold_font, self.hover_color) if hover else (self.font, self.color)
-        self.text, _ = font.render(self.text_input, color, size=self.font_size)
+        font, color, rect_color = (self.bold_font, self.hover_color, self.rect_hover_color) if hover else (self.font, self.color, None)
+        self.update_text(font, color)
+        if rect_color:
+            pygame.draw.rect(self.screen, rect_color, self.rect.inflate(20, 20))
 
     def event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.check_for_input(event.pos):
