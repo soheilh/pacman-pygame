@@ -51,7 +51,7 @@ class Game:
     def setup_display(self):
         self.screen_width, self.screen_height = settings.RESOLUTION
         display_mode = pygame.FULLSCREEN if settings.DISPLAY_MODE == "fullscreen" else pygame.RESIZABLE
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), display_mode)
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), display_mode, vsync=getattr(settings, "VSYNC"))
         self.update_offsets()
 
     def update_offsets(self):
@@ -95,7 +95,7 @@ class Game:
     def update_fps_display(self, delta_time):
         self.fps_timer += delta_time
         if self.fps_timer >= 1.0:  # Update FPS every second
-            self.fps_text, self.fps_rect = self.oxanium.render("FPS: " + str(int(self.clock.get_fps())), settings.WHITE, size=24)
+            self.fps_text, self.fps_rect = self.oxanium.render("FPS: " + str(int(self.clock.get_fps())) + " | Vsync: " + str(getattr(settings, "VSYNC")), settings.WHITE, size=24)
             self.fps_timer = 0
         if self.fps_text and self.fps_rect and settings.SHOW_FPS:
             self.fps_rect.topleft = (20, 20)
