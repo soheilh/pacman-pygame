@@ -99,8 +99,10 @@ class Slider:
         elif event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_RIGHT, pygame.K_RETURN]:
                 self.change_value(1)
+                return self.action
             elif event.key == pygame.K_LEFT:
                 self.change_value(-1)
+                return self.action
 
     def change_value(self, direction=1):
         new_value = self.current_value + direction
