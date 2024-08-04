@@ -64,7 +64,7 @@ class MainMenu:
 
         for i, title in enumerate(menu_options):
             pos = (50, self.left_menu_surface.get_height() / 2 + i * 40)
-            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=(229, 229, 229), hover_color=(252, 252, 252), rect_hover_color=settings.WHITE))
+            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=settings.WHITE, hover_color=settings.BRIGHT_WHITE, rect_hover_color=None))
 
             item = menu_options.get(title, {})
             if item["type"] == "button" and item.get("right_menu", False) and item["value"] in self.main_menu:
