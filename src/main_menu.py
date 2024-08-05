@@ -127,54 +127,69 @@ class MainMenu:
     def events(self, event):
         """Handle user input events."""
         if event.type == pygame.KEYDOWN:
-            if self.right_menu_status:
-                right_menu_key = self.left_elements[self.left_menu_item].action
-                if right_menu_key in self.right_elements:
-                    num_elements = len(self.right_elements[right_menu_key])
-                    if event.key == pygame.K_UP:
-                        self.right_menu_item = (self.right_menu_item - 1) % num_elements
-                        if self.right_menu_item < self.scroll_offset:
-                            self.scroll_offset = self.right_menu_item
-                        elif self.right_menu_item >= self.scroll_offset + self.MAX_VISIBLE_ITEMS:
-                            self.scroll_offset = self.right_menu_item - self.MAX_VISIBLE_ITEMS + 1
+            return self.handle_key(event)
+        return True, True
 
-                    elif event.key == pygame.K_DOWN:
-                        self.right_menu_item = (self.right_menu_item + 1) % num_elements
-                        if self.right_menu_item < self.scroll_offset:
-                            self.scroll_offset = self.right_menu_item
-                        elif self.right_menu_item >= self.scroll_offset + self.MAX_VISIBLE_ITEMS:
-                            self.scroll_offset = self.right_menu_item - self.MAX_VISIBLE_ITEMS + 1
+    def handle_key(self, event):
+        """Handle navigation keys for both left and right menus."""
+        if event.key == pygame.K_UP:
+            self.navigate_menu(-1)
+        elif event.key == pygame.K_DOWN:
+            self.navigate_menu(1)
+        elif event.key in [pygame.K_RETURN, pygame.K_RIGHT, pygame.K_LEFT]:
+            return self.select_menu_item(event)
+        elif event.key == pygame.K_ESCAPE:
+            self.navigate_back()
+        return True, True
 
-                    elif event.key in [pygame.K_RETURN, pygame.K_LEFT, pygame.K_RIGHT]:
-                        element = self.right_elements[right_menu_key][self.right_menu_item][0]
-                        action = element.event(event)
-                        return self.handle_action(action)
-                    elif event.key == pygame.K_ESCAPE:
-                        self.right_menu_status = False
+    def navigate_menu(self, direction):
+        """Navigate through the menu items."""
+        if self.right_menu_status:
+            right_menu_key = self.left_elements[self.left_menu_item].action
+            if right_menu_key in self.right_elements:
+                num_elements = len(self.right_elements[right_menu_key])
+                self.right_menu_item = (self.right_menu_item + direction) % num_elements
+                self.adjust_scroll()
+        else:
+            self.left_menu_item = (self.left_menu_item + direction) % len(self.left_elements)
+
+    def adjust_scroll(self):
+        """Adjust scroll offset based on the current right menu item."""
+        if self.right_menu_item < self.scroll_offset:
+            self.scroll_offset = self.right_menu_item
+        elif self.right_menu_item >= self.scroll_offset + self.MAX_VISIBLE_ITEMS:
+            self.scroll_offset = self.right_menu_item - self.MAX_VISIBLE_ITEMS + 1
+
+    def select_menu_item(self, event):
+        """Select the current menu item."""
+        if self.right_menu_status:
+            right_menu_key = self.left_elements[self.left_menu_item].action
+            if right_menu_key in self.right_elements:
+                element = self.right_elements[right_menu_key][self.right_menu_item][0]
+                action = element.event(event)
+                return self.handle_action(action)
+        else:
+            left_action_key = self.left_elements[self.left_menu_item].action
+            if left_action_key in self.right_elements and self.main_menu[self.current_menu][left_action_key].get("right_menu", False):
+                self.right_menu_status = True
+                self.right_menu_item = 0
+                self.scroll_offset = 0
             else:
-                if event.key == pygame.K_UP:
-                    self.left_menu_item = (self.left_menu_item - 1) % len(self.left_elements)
-                elif event.key == pygame.K_DOWN:
-                    self.left_menu_item = (self.left_menu_item + 1) % len(self.left_elements)
-                elif event.key == pygame.K_RETURN:
-                    left_action_key = self.left_elements[self.left_menu_item].action
-                    if left_action_key in self.right_elements and self.main_menu[self.current_menu][left_action_key].get("right_menu", False):
-                        self.right_menu_status = True
-                        self.right_menu_item = 0
-                        self.scroll_offset = 0
-                    else:
-                        element = self.left_elements[self.left_menu_item]
-                        action = element.event(event)
-                        return self.handle_action(action)
-                elif event.key == pygame.K_ESCAPE:
-                    if self.right_menu_status:
-                        self.right_menu_status = False
-                    elif self.menu_stack:
-                        self.current_menu = self.menu_stack.pop()
-                        self.left_menu_item = self.menu_item_stack.pop()
-                        self.right_menu_item = 0
-                        self.right_menu_status = False
-                        self.create_elements()
+                element = self.left_elements[self.left_menu_item]
+                action = element.event(event)
+                return self.handle_action(action)
+        return True, True
+
+    def navigate_back(self):
+        """Handle navigation back to the previous menu."""
+        if self.right_menu_status:
+            self.right_menu_status = False
+        elif self.menu_stack:
+            self.current_menu = self.menu_stack.pop()
+            self.left_menu_item = self.menu_item_stack.pop()
+            self.right_menu_item = 0
+            self.right_menu_status = False
+            self.create_elements()
         return True, True
 
     def handle_action(self, action):
