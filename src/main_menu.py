@@ -54,32 +54,53 @@ class MainMenu:
                 "sound effect volume": {"type": "slider", "value": "EFFECT_VOLUME", "options": range(0, 11)},
             },
         }
+        self.left_elements_cache = {}
+        self.right_elements_cache = {}
         self.create_elements()
 
     def create_elements(self):
-        """Create UI elements for the current menu."""
-        self.left_elements = []
-        self.right_elements = {}
-        menu_options = self.main_menu.get(self.current_menu, {})
-
-        for i, title in enumerate(menu_options):
-            pos = (50, self.left_menu_surface.get_height() / 2 + i * 40)
-            self.left_elements.append(Button(screen=self.left_menu_surface, text_input=title, action=menu_options[title]["value"], pos=pos, font=self.font, bold_font=self.bold_font, font_size=26, color=settings.WHITE, hover_color=settings.BRIGHT_WHITE, rect_hover_color=None))
-
-            item = menu_options.get(title, {})
-            if item["type"] == "button" and item.get("right_menu", False) and item["value"] in self.main_menu:
-                submenu = self.main_menu[item["value"]]
-                if submenu:
-                    self.right_elements[title] = []
+        """Create UI elements for all menus."""
+        for menu_name, menu_items in self.main_menu.items():
+            self.left_elements_cache[menu_name] = []
+            for i, title in enumerate(menu_items):
+                pos = (50, self.left_menu_surface.get_height() / 2 + i * 40)
+                self.left_elements_cache[menu_name].append(
+                    Button(
+                        screen=self.left_menu_surface,
+                        text_input=title,
+                        action=menu_items[title]["value"],
+                        pos=pos,
+                        font=self.font,
+                        bold_font=self.bold_font,
+                        font_size=26,
+                        color=settings.WHITE,
+                        hover_color=settings.BRIGHT_WHITE,
+                        rect_hover_color=None
+                    )
+                )
+            self.right_elements_cache[menu_name] = {}
+            for title, item in menu_items.items():
+                if item["type"] == "button" and item.get("right_menu", False) and item["value"] in self.main_menu:
+                    submenu = self.main_menu[item["value"]]
+                    self.right_elements_cache[menu_name][title] = []
                     for j, (text, action) in enumerate(submenu.items()):
                         pos = (0, j * self.ITEM_VERTICAL_SPACING + 35)
-                        common_args = {'pos': pos, 'screen': self.right_menu_content_surface, 'font': self.font, 'font_size': 24, 'color': settings.WHITE, 'hover_color': settings.BLACK, 'rect_hover_color': settings.WHITE}
+                        common_args = {
+                            'pos': pos,
+                            'screen': self.right_menu_content_surface,
+                            'font': self.font,
+                            'font_size': 24,
+                            'color': settings.WHITE,
+                            'hover_color': settings.BLACK,
+                            'rect_hover_color': settings.WHITE
+                        }
                         if action["type"] == "selector":
-                            self.right_elements[title].append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements_cache[menu_name][title].append((Selector(name=text, options=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "slider":
-                            self.right_elements[title].append((Slider(name=text, range_values=action["options"], action=action["value"], **common_args), action))
+                            self.right_elements_cache[menu_name][title].append((Slider(name=text, range_values=action["options"], action=action["value"], **common_args), action))
                         elif action["type"] == "button":
-                            self.right_elements[title].append((Button(text_input=text, bold_font=self.bold_font, action=action["value"], **common_args), action))
+                            self.right_elements_cache[menu_name][title].append((Button(text_input=text, bold_font=self.bold_font, action=action["value"], **common_args), action))
+        self.left_elements = self.left_elements_cache[self.current_menu]
 
     def draw(self, screen):
         """Draw the current menu and its elements on the screen."""
@@ -102,19 +123,19 @@ class MainMenu:
         """Draw the right-side menu elements."""
         self.right_menu_surface.fill(settings.MENU_BG_COLOR)
         right_menu_key = self.left_elements[self.left_menu_item].action
-        if right_menu_key in self.right_elements:
-            content_height = len(self.right_elements[right_menu_key]) * self.ITEM_VERTICAL_SPACING
+        if right_menu_key in self.right_elements_cache[self.current_menu]:
+            content_height = len(self.right_elements_cache[self.current_menu][right_menu_key]) * self.ITEM_VERTICAL_SPACING
             self.right_menu_content_surface = pygame.transform.scale(self.right_menu_content_surface, (self.right_menu_surface.get_width(), content_height))
             self.right_menu_content_surface.fill(settings.MENU_BG_COLOR)
 
             if self.right_menu_status:
-                visible_elements = self.right_elements[right_menu_key][self.scroll_offset:self.scroll_offset + self.MAX_VISIBLE_ITEMS]
+                visible_elements = self.right_elements_cache[self.current_menu][right_menu_key][self.scroll_offset:self.scroll_offset + self.MAX_VISIBLE_ITEMS]
                 for i, (element, _) in enumerate(visible_elements):
                     element.screen = self.right_menu_content_surface
                     element.change_style(i == (self.right_menu_item - self.scroll_offset))
                     element.update()
             else:
-                for element, _ in self.right_elements[right_menu_key][:self.MAX_VISIBLE_ITEMS]:
+                for element, _ in self.right_elements_cache[self.current_menu][right_menu_key][:self.MAX_VISIBLE_ITEMS]:
                     element.screen = self.right_menu_content_surface
                     element.change_style(False)
                     element.update()
@@ -146,8 +167,8 @@ class MainMenu:
         """Navigate through the menu items."""
         if self.right_menu_status:
             right_menu_key = self.left_elements[self.left_menu_item].action
-            if right_menu_key in self.right_elements:
-                num_elements = len(self.right_elements[right_menu_key])
+            if right_menu_key in self.right_elements_cache[self.current_menu]:
+                num_elements = len(self.right_elements_cache[self.current_menu][right_menu_key])
                 self.right_menu_item = (self.right_menu_item + direction) % num_elements
                 self.adjust_scroll()
         else:
@@ -164,13 +185,13 @@ class MainMenu:
         """Select the current menu item."""
         if self.right_menu_status:
             right_menu_key = self.left_elements[self.left_menu_item].action
-            if right_menu_key in self.right_elements:
-                element = self.right_elements[right_menu_key][self.right_menu_item][0]
+            if right_menu_key in self.right_elements_cache[self.current_menu]:
+                element = self.right_elements_cache[self.current_menu][right_menu_key][self.right_menu_item][0]
                 action = element.event(event)
                 return self.handle_action(action)
         else:
             left_action_key = self.left_elements[self.left_menu_item].action
-            if left_action_key in self.right_elements and self.main_menu[self.current_menu][left_action_key].get("right_menu", False):
+            if left_action_key in self.right_elements_cache[self.current_menu] and self.main_menu[self.current_menu][left_action_key].get("right_menu", False):
                 self.right_menu_status = True
                 self.right_menu_item = 0
                 self.scroll_offset = 0
@@ -189,7 +210,7 @@ class MainMenu:
             self.left_menu_item = self.menu_item_stack.pop()
             self.right_menu_item = 0
             self.right_menu_status = False
-            self.create_elements()
+            self.left_elements = self.left_elements_cache[self.current_menu]
         return True, True
 
     def handle_action(self, action):
@@ -206,5 +227,5 @@ class MainMenu:
             self.left_menu_item = 0
             self.right_menu_item = 0
             self.right_menu_status = False
-            self.create_elements()
+            self.left_elements = self.left_elements_cache[self.current_menu]
         return True, True
