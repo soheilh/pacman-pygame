@@ -3,6 +3,8 @@ import os
 from settings import TILE_SIZE
 
 class Player(pygame.sprite.Sprite):
+    SCALE = 1.25
+
     def __init__(self, x, y):
         super().__init__()
         self.direction = "right"
@@ -29,7 +31,7 @@ class Player(pygame.sprite.Sprite):
     def load_images(self):
         # Load images (one set of images)
         base_path = "assets/images/pacman"
-        size = (TILE_SIZE * 1.25, TILE_SIZE * 1.25)
+        size = (TILE_SIZE * self.SCALE, TILE_SIZE * self.SCALE)
         for i in range(1, 4):
             image_path = os.path.join(base_path, f"{i}.png")
             image = pygame.image.load(image_path).convert_alpha()
@@ -148,5 +150,4 @@ class Player(pygame.sprite.Sprite):
         # Calculate the top-left position to blit the image centered on the rect
         top_left_x = self.rect.centerx - self.image.get_width() / 2
         top_left_y = self.rect.centery - self.image.get_height() / 2
-        # Blit the image at the calculated position
         screen.blit(self.image, (top_left_x, top_left_y))
