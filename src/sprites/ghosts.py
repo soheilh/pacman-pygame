@@ -3,12 +3,13 @@ import os
 from settings import TILE_SIZE
 
 class Ghost(pygame.sprite.Sprite):
+    SCALE = 1.25
+
     def __init__(self, x, y, ghost_name, scatter_target):
         super().__init__()
         self.direction = "left"
         self.load_images(ghost_name)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
         self.move_speed = 150
         self.velocity = pygame.Vector2(0, 0)
         self.scatter_target = scatter_target
@@ -25,7 +26,7 @@ class Ghost(pygame.sprite.Sprite):
 
     def load_images(self, name):
         base_path = "assets/images/ghosts"
-        size = (TILE_SIZE, TILE_SIZE)
+        size = (TILE_SIZE * self.SCALE, TILE_SIZE * self.SCALE)
         image_path = os.path.join(base_path, f"{name}.png")
         self.image = pygame.image.load(image_path).convert_alpha()
         self.image = pygame.transform.scale(self.image, size)
@@ -141,6 +142,13 @@ class Ghost(pygame.sprite.Sprite):
         elif y == -1 or y == height:
             self.rect.centery = (height - abs(y) + 0.5) * TILE_SIZE
 
+    def draw(self, screen):
+        # Calculate the top-left position to blit the image centered on the rect
+        top_left_x = self.rect.centerx - self.image.get_width() / 2
+        top_left_y = self.rect.centery - self.image.get_height() / 2
+        screen.blit(self.image, (top_left_x, top_left_y))
+
+# Define the subclasses
 class Blinky(Ghost):
     def __init__(self, x, y):
         super().__init__(x, y, "blinky", (27, 1))

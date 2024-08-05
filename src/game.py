@@ -157,11 +157,10 @@ class Game:
         self.walls.draw(self.map_area_surface)
         self.scores.draw(self.map_area_surface)
         self.player.draw(self.map_area_surface)
-        
         if getattr(settings, "SHOW_DIRECTION_ARROW", False):
             direction_arrow = self.player.draw_direction_arrow()
             self.map_area_surface.blit(direction_arrow[0], direction_arrow[1])
-        
-        self.ghosts.draw(self.map_area_surface)
+        for ghost in self.ghosts:
+            ghost.draw(self.map_area_surface)
         self.game_surface.blit(self.map_area_surface, (0, self.top_ui_height))
         self.screen.blit(self.game_surface, (self.x_offset, self.y_offset))
