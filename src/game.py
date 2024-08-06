@@ -4,8 +4,7 @@ from pygame.locals import *
 from sprites.player import Player
 import settings
 from level import load_level
-from main_menu import MainMenu
-from components.pause_menu import PauseMenu
+from menu import MainMenu, PauseMenu
 
 # Set the process DPI awareness
 import ctypes
@@ -21,7 +20,7 @@ class Game:
         self.running = True
         self.paused = False
         self.main_menu = MainMenu(self.screen, self.oxanium, self.oxanium_bold)
-        self.pause_menu = PauseMenu(self.screen, self.uifont, self.uifont)
+        self.pause_menu = PauseMenu(self.screen, self.oxanium, self.oxanium_bold)
         self.show_main_menu = True
 
         # FPS display variables
@@ -82,7 +81,7 @@ class Game:
             self.events()
             delta_time = self.clock.tick(settings.FPS) / 1000.0
             if self.show_main_menu:
-                self.main_menu.draw(self.screen)
+                self.main_menu.draw()
             elif not self.paused:
                 self.update(delta_time)
                 self.draw()
@@ -105,21 +104,14 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            elif self.show_main_menu:
-                self.running, self.show_main_menu = self.main_menu.events(event)
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    if self.paused:
-                        self.running, self.paused = self.pause_menu.events(event)
-                    else:
-                        self.paused = True
+                if self.show_main_menu:
+                    self.running, self.show_main_menu = self.main_menu.events(event)
                 elif self.paused:
                     self.running, self.paused = self.pause_menu.events(event)
-            elif event.type == pygame.MOUSEMOTION and self.paused:
-                self.pause_menu.events(event)
-            elif event.type == pygame.MOUSEBUTTONDOWN and self.paused:
-                self.running, self.paused = self.pause_menu.events(event)
-            elif event.type == VIDEORESIZE:
+                elif not self.paused and event.key == pygame.K_ESCAPE:
+                    self.paused = True
+            elif event.type == pygame.VIDEORESIZE:
                 self.screen_width, self.screen_height = event.size
                 self.update_offsets()
                 display_mode = pygame.FULLSCREEN if settings.DISPLAY_MODE == "fullscreen" else pygame.RESIZABLE
@@ -139,7 +131,6 @@ class Game:
         self.draw_ui()
         self.draw_game_objects()
         if self.paused:
-            self.pause_menu.apply_blur_effect()
             self.pause_menu.draw()
 
     def draw_ui(self):
