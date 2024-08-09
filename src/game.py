@@ -1,4 +1,5 @@
 import pygame
+import os
 import pygame.freetype
 from pygame.locals import *
 from sprites.player import Player
@@ -7,8 +8,9 @@ from level import load_level
 from menu import MainMenu, PauseMenu
 
 # Set the process DPI awareness
-import ctypes
-ctypes.windll.user32.SetProcessDPIAware()
+if os.name == "nt":
+    import ctypes
+    ctypes.windll.user32.SetProcessDPIAware()
 
 class Game:
     def __init__(self):
